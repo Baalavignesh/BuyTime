@@ -73,11 +73,21 @@
 			);
 			target = 2DC6ABF82F0C5395004280A6 /* BuyTimeDeviceActivityMonitor */;
 		};
+		2DC6AC1A2F0EF85C004280A6 /* Exceptions for "BuyTime" folder in "BuyTimeShield" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Utilities/SharedData.swift,
+			);
+			target = 2DC6ABE12F0C502C004280A6 /* BuyTimeShield */;
+		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		2DBCC22A2EF32EAE004E1FEB /* BuyTime */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				2DC6AC1A2F0EF85C004280A6 /* Exceptions for "BuyTime" folder in "BuyTimeShield" target */,
+			);
 			path = BuyTime;
 			sourceTree = "<group>";
 		};

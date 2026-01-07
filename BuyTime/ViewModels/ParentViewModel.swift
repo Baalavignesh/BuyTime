@@ -13,7 +13,8 @@ internal import Combine
 class AuthorizationManager: ObservableObject {
     
     @Published var authorizationStatus: FamilyControls.AuthorizationStatus = .notDetermined
-    
+    @Published var isLoading = true
+
     private var cancellables = Set<AnyCancellable>()
     
     init() {
@@ -25,6 +26,7 @@ class AuthorizationManager: ObservableObject {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] status in
                 self?.authorizationStatus = status
+                self?.isLoading = false
             }
             .store(in: &cancellables)
     }

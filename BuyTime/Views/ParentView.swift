@@ -22,7 +22,17 @@ struct ParentView: View {
     
     var body: some View {
         
-        if authManager.authorizationStatus == .notDetermined {
+        if authManager.isLoading {
+            VStack {
+                Image(systemName: "hourglass")
+                    .font(.system(size: 60))
+                    .foregroundStyle(.tint)
+                Text("BuyTime")
+                    .font(.largeTitle)
+                    .fontWeight(.bold)
+            }
+        }
+        else if authManager.authorizationStatus == .notDetermined {
             VStack {
                 
                 Text("BuyTime").font(.largeTitle)
@@ -46,7 +56,7 @@ struct ParentView: View {
         else if authManager.authorizationStatus == .approved {
             if !hasCompletedAppSelection {
                 VStack {
-                                    Text("Select Apps to Monitor")
+                                    Text("Select Distracting Apps to Block")
                                         .font(.headline)
                                         .padding(.top)
                                     
@@ -104,6 +114,7 @@ struct ParentView: View {
     }
     private func saveSelection() {
         print("Saving selection: \(selection)")
+        SharedData.blockedAppsSelection = selection
     }
 
 }

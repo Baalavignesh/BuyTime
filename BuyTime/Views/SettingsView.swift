@@ -7,12 +7,13 @@
 
 import SwiftUI
 import Clerk
+import FamilyControls
 
 struct SettingsView: View {
     
     @Environment(\.clerk) private var clerk
     @State var isPresented = false
-    
+    @State var selection = SharedData.blockedAppsSelection
     var body: some View {
         NavigationStack {
             List {
@@ -21,9 +22,16 @@ struct SettingsView: View {
                         Label("Personal Info", systemImage: "person.circle")
                     }
                     
-//                    Button("App Picker") { isPresented = true }
-//                           .familyActivityPicker(isPresented: $isPresented,
-//                                                selection: $selection)
+                    Button { isPresented = true } label: {
+                        HStack {
+                            Label("Blocked Apps", systemImage: "apps.iphone.badge.plus")
+                            Spacer()
+                        }
+                        .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                           .familyActivityPicker(isPresented: $isPresented,
+                                                selection: $selection)
                     Button {
                         Task {
                             await handleLogout()
@@ -52,6 +60,9 @@ struct SettingsView: View {
                 }
                 
             }.navigationBarTitle(Text("Settings"))
+        }.onChange(of: selection) { oldValue, newValue in
+            SharedData.blockedAppsSelection = newValue
+            print("Saved \(newValue.applicationTokens.count) apps")
         }
     }
     
