@@ -15,6 +15,8 @@
 		2DC6ABEF2F0C502C004280A6 /* BuyTimeShield.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 2DC6ABE22F0C502C004280A6 /* BuyTimeShield.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		2DC6ABFB2F0C5395004280A6 /* DeviceActivity.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2DC6ABFA2F0C5395004280A6 /* DeviceActivity.framework */; };
 		2DC6AC032F0C5395004280A6 /* BuyTimeDeviceActivityMonitor.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 2DC6ABF92F0C5395004280A6 /* BuyTimeDeviceActivityMonitor.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		2DC6AC232F119023004280A6 /* ManagedSettings.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2DC6ABE42F0C502C004280A6 /* ManagedSettings.framework */; };
+		2DC6AC2B2F119023004280A6 /* BuyTimeShieldActionExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 2DC6AC222F119023004280A6 /* BuyTimeShieldActionExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -32,6 +34,13 @@
 			remoteGlobalIDString = 2DC6ABF82F0C5395004280A6;
 			remoteInfo = BuyTimeDeviceActivityMonitor;
 		};
+		2DC6AC292F119023004280A6 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 2DBCC2202EF32EAE004E1FEB /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 2DC6AC212F119023004280A6;
+			remoteInfo = BuyTimeShieldActionExtension;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -42,6 +51,7 @@
 			dstSubfolderSpec = 13;
 			files = (
 				2DC6AC032F0C5395004280A6 /* BuyTimeDeviceActivityMonitor.appex in Embed Foundation Extensions */,
+				2DC6AC2B2F119023004280A6 /* BuyTimeShieldActionExtension.appex in Embed Foundation Extensions */,
 				2DC6ABEF2F0C502C004280A6 /* BuyTimeShield.appex in Embed Foundation Extensions */,
 			);
 			name = "Embed Foundation Extensions";
@@ -56,6 +66,7 @@
 		2DC6ABE62F0C502C004280A6 /* ManagedSettingsUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ManagedSettingsUI.framework; path = System/Library/Frameworks/ManagedSettingsUI.framework; sourceTree = SDKROOT; };
 		2DC6ABF92F0C5395004280A6 /* BuyTimeDeviceActivityMonitor.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = BuyTimeDeviceActivityMonitor.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		2DC6ABFA2F0C5395004280A6 /* DeviceActivity.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = DeviceActivity.framework; path = System/Library/Frameworks/DeviceActivity.framework; sourceTree = SDKROOT; };
+		2DC6AC222F119023004280A6 /* BuyTimeShieldActionExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = BuyTimeShieldActionExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -76,9 +87,31 @@
 		2DC6AC1A2F0EF85C004280A6 /* Exceptions for "BuyTime" folder in "BuyTimeShield" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				Utilities/ManagedSettings.swift,
 				Utilities/SharedData.swift,
 			);
 			target = 2DC6ABE12F0C502C004280A6 /* BuyTimeShield */;
+		};
+		2DC6AC2C2F119023004280A6 /* Exceptions for "BuyTimeShieldActionExtension" folder in "BuyTimeShieldActionExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 2DC6AC212F119023004280A6 /* BuyTimeShieldActionExtension */;
+		};
+		2DC6AC332F119664004280A6 /* Exceptions for "BuyTime" folder in "BuyTimeShieldActionExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Utilities/SharedData.swift,
+			);
+			target = 2DC6AC212F119023004280A6 /* BuyTimeShieldActionExtension */;
+		};
+		2DC6AC352F119AF9004280A6 /* Exceptions for "BuyTime" folder in "BuyTimeDeviceActivityMonitor" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Utilities/SharedData.swift,
+			);
+			target = 2DC6ABF82F0C5395004280A6 /* BuyTimeDeviceActivityMonitor */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
@@ -87,6 +120,8 @@
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				2DC6AC1A2F0EF85C004280A6 /* Exceptions for "BuyTime" folder in "BuyTimeShield" target */,
+				2DC6AC352F119AF9004280A6 /* Exceptions for "BuyTime" folder in "BuyTimeDeviceActivityMonitor" target */,
+				2DC6AC332F119664004280A6 /* Exceptions for "BuyTime" folder in "BuyTimeShieldActionExtension" target */,
 			);
 			path = BuyTime;
 			sourceTree = "<group>";
@@ -105,6 +140,14 @@
 				2DC6AC042F0C5395004280A6 /* Exceptions for "BuyTimeDeviceActivityMonitor" folder in "BuyTimeDeviceActivityMonitor" target */,
 			);
 			path = BuyTimeDeviceActivityMonitor;
+			sourceTree = "<group>";
+		};
+		2DC6AC242F119023004280A6 /* BuyTimeShieldActionExtension */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				2DC6AC2C2F119023004280A6 /* Exceptions for "BuyTimeShieldActionExtension" folder in "BuyTimeShieldActionExtension" target */,
+			);
+			path = BuyTimeShieldActionExtension;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -137,6 +180,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		2DC6AC1F2F119023004280A6 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2DC6AC232F119023004280A6 /* ManagedSettings.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -146,6 +197,7 @@
 				2DBCC22A2EF32EAE004E1FEB /* BuyTime */,
 				2DC6ABE82F0C502C004280A6 /* BuyTimeShield */,
 				2DC6ABFC2F0C5395004280A6 /* BuyTimeDeviceActivityMonitor */,
+				2DC6AC242F119023004280A6 /* BuyTimeShieldActionExtension */,
 				2DC6ABE32F0C502C004280A6 /* Frameworks */,
 				2DBCC2292EF32EAE004E1FEB /* Products */,
 			);
@@ -157,6 +209,7 @@
 				2DBCC2282EF32EAE004E1FEB /* BuyTime.app */,
 				2DC6ABE22F0C502C004280A6 /* BuyTimeShield.appex */,
 				2DC6ABF92F0C5395004280A6 /* BuyTimeDeviceActivityMonitor.appex */,
+				2DC6AC222F119023004280A6 /* BuyTimeShieldActionExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -188,6 +241,7 @@
 			dependencies = (
 				2DC6ABEE2F0C502C004280A6 /* PBXTargetDependency */,
 				2DC6AC022F0C5395004280A6 /* PBXTargetDependency */,
+				2DC6AC2A2F119023004280A6 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				2DBCC22A2EF32EAE004E1FEB /* BuyTime */,
@@ -246,6 +300,28 @@
 			productReference = 2DC6ABF92F0C5395004280A6 /* BuyTimeDeviceActivityMonitor.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
+		2DC6AC212F119023004280A6 /* BuyTimeShieldActionExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 2DC6AC2D2F119023004280A6 /* Build configuration list for PBXNativeTarget "BuyTimeShieldActionExtension" */;
+			buildPhases = (
+				2DC6AC1E2F119023004280A6 /* Sources */,
+				2DC6AC1F2F119023004280A6 /* Frameworks */,
+				2DC6AC202F119023004280A6 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				2DC6AC242F119023004280A6 /* BuyTimeShieldActionExtension */,
+			);
+			name = BuyTimeShieldActionExtension;
+			packageProductDependencies = (
+			);
+			productName = BuyTimeShieldActionExtension;
+			productReference = 2DC6AC222F119023004280A6 /* BuyTimeShieldActionExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -263,6 +339,9 @@
 						CreatedOnToolsVersion = 26.2;
 					};
 					2DC6ABF82F0C5395004280A6 = {
+						CreatedOnToolsVersion = 26.2;
+					};
+					2DC6AC212F119023004280A6 = {
 						CreatedOnToolsVersion = 26.2;
 					};
 				};
@@ -288,6 +367,7 @@
 				2DBCC2272EF32EAE004E1FEB /* BuyTime */,
 				2DC6ABE12F0C502C004280A6 /* BuyTimeShield */,
 				2DC6ABF82F0C5395004280A6 /* BuyTimeDeviceActivityMonitor */,
+				2DC6AC212F119023004280A6 /* BuyTimeShieldActionExtension */,
 			);
 		};
 /* End PBXProject section */
@@ -308,6 +388,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		2DC6ABF72F0C5395004280A6 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		2DC6AC202F119023004280A6 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -338,6 +425,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		2DC6AC1E2F119023004280A6 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -350,6 +444,11 @@
 			isa = PBXTargetDependency;
 			target = 2DC6ABF82F0C5395004280A6 /* BuyTimeDeviceActivityMonitor */;
 			targetProxy = 2DC6AC012F0C5395004280A6 /* PBXContainerItemProxy */;
+		};
+		2DC6AC2A2F119023004280A6 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 2DC6AC212F119023004280A6 /* BuyTimeShieldActionExtension */;
+			targetProxy = 2DC6AC292F119023004280A6 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -659,6 +758,64 @@
 			};
 			name = Release;
 		};
+		2DC6AC2E2F119023004280A6 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = BuyTimeShieldActionExtension/BuyTimeShieldActionExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = C5682GULYK;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = BuyTimeShieldActionExtension/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = BuyTimeShieldActionExtension;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.baalavignesh.BuyTime.BuyTimeShieldActionExtension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		2DC6AC2F2F119023004280A6 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = BuyTimeShieldActionExtension/BuyTimeShieldActionExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = C5682GULYK;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = BuyTimeShieldActionExtension/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = BuyTimeShieldActionExtension;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.baalavignesh.BuyTime.BuyTimeShieldActionExtension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -694,6 +851,15 @@
 			buildConfigurations = (
 				2DC6AC062F0C5395004280A6 /* Debug */,
 				2DC6AC072F0C5395004280A6 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		2DC6AC2D2F119023004280A6 /* Build configuration list for PBXNativeTarget "BuyTimeShieldActionExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				2DC6AC2E2F119023004280A6 /* Debug */,
+				2DC6AC2F2F119023004280A6 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

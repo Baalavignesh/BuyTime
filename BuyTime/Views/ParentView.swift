@@ -88,13 +88,9 @@ struct ParentView: View {
                     }
                 }
             }
-
-
         }
         else {
-            
             VStack {
-                
                 Text("BuyTime").font(.largeTitle)
                 Image(systemName: "hourglass.badge.lock")
                     .font(.title)
@@ -113,8 +109,13 @@ struct ParentView: View {
         }
     }
     private func saveSelection() {
-        print("Saving selection: \(selection)")
         SharedData.blockedAppsSelection = selection
+
+        let blockUtils = AppBlockUtils()
+        blockUtils.startMonitoringSchedule()
+        blockUtils.applyRestrictions(selection: selection)
+
+        print("Selection saved: \(selection)")
     }
 
 }

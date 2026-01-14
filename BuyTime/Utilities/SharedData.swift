@@ -13,7 +13,9 @@ class SharedData {
     
     enum Keys: String {
         case blockedApps = "blockedAppsSelection"
-        
+        case temporaryUnlockActive = "temporaryUnlockActive"
+        case temporaryUnlockExpiry = "temporaryUnlockExpiry"
+
         var key: String {
             self.rawValue
         }
@@ -24,7 +26,7 @@ class SharedData {
             guard let data = defaultsGroup?.data(forKey: Keys.blockedApps.key) else {
                 return FamilyActivitySelection()
             }
-            
+
             do {
                 return try JSONDecoder().decode(FamilyActivitySelection.self, from: data)
             } catch {
@@ -41,4 +43,6 @@ class SharedData {
             }
         }
     }
+
+
 }
