@@ -18,7 +18,11 @@ class ShieldActionExtension: ShieldActionDelegate {
     let store = ManagedSettingsStore(named: ManagedSettingsStore.Name("buytimeAppRestriction"))
     
     // Action for Application
-    override func handle(action: ShieldAction, for application: ApplicationToken, completionHandler: @escaping (ShieldActionResponse) -> Void) {
+    override func handle(
+        action: ShieldAction,
+        for application: ApplicationToken,
+        completionHandler: @escaping (ShieldActionResponse) -> Void) {
+            
         print("ShieldAction triggered: \(action)")
         switch action {
         case .primaryButtonPressed:
@@ -42,25 +46,21 @@ class ShieldActionExtension: ShieldActionDelegate {
     }
 
     private func handleTemporaryAccess(completionHandler: @escaping (ShieldActionResponse) -> Void) {
-        // Handle the temporary access as needed.
-        // Remove ALL shields - user can access any previously blocked app
-        store.shield.applications = nil
-        store.shield.applicationCategories = nil
-        store.shield.webDomains = nil
 
-        let center = DeviceActivityCenter()
-        let now = Calendar.current.dateComponents([.hour, .minute, .second], from: Date())
-        let endTime = Calendar.current.dateComponents([.hour, .minute, .second], from: Date().addingTimeInterval(1 * 60))
-        let schedule = DeviceActivitySchedule(
-            intervalStart: DateComponents(hour: now.hour, minute: now.minute, second: now.second),
-            intervalEnd: DateComponents(hour: endTime.hour, minute: endTime.minute, second: endTime.second),
-            repeats: false
-        )
-        do {
-            try center.startMonitoring(DeviceActivityName("com.baalavignesh.buytime.temporaryUnlock"), during: schedule)
-        } catch {
-            print("Failed to schedule re-lock: \(error)")
+        let spendAmount = SharedData.spendAmount
+        let currentBalance = SharedData.earnedTimeMinutes
+        
+        guard currentBalance >= spendAmount else {
+            print("✗ Insufficient balance: need \(spendAmount), have \(currentBalance)")
+            // TODO: Could show a message to user here saying no time left in wallet
+            completionHandler(.close)
+            return
         }
-        completionHandler(.close)
+        
+        SharedData.earnedTimeMinutes = currentBalance - spendAmount
+        let blockUtils = AppBlockUtils()
+        
+        blockUtils.startEarnedTimeMonitoring(minutes: spendAmount)
+        completionHandler(.none)
 }
 }

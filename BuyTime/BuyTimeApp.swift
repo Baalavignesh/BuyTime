@@ -25,7 +25,6 @@ struct ClerkQuickstartApp: App {
                     if !savedSelection.applicationTokens.isEmpty ||
                         !savedSelection.categoryTokens.isEmpty {
                         let blockUtils = AppBlockUtils()
-                        blockUtils.startMonitoringSchedule()
                         blockUtils.applyRestrictions(selection: savedSelection)
                     }
                 }

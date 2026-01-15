@@ -112,7 +112,6 @@ struct ParentView: View {
         SharedData.blockedAppsSelection = selection
 
         let blockUtils = AppBlockUtils()
-        blockUtils.startMonitoringSchedule()
         blockUtils.applyRestrictions(selection: selection)
 
         print("Selection saved: \(selection)")

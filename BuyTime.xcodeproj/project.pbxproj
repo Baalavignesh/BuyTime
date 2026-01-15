@@ -87,6 +87,7 @@
 		2DC6AC1A2F0EF85C004280A6 /* Exceptions for "BuyTime" folder in "BuyTimeShield" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				Assets/dark_logo.png,
 				Utilities/ManagedSettings.swift,
 				Utilities/SharedData.swift,
 			);
@@ -102,6 +103,7 @@
 		2DC6AC332F119664004280A6 /* Exceptions for "BuyTime" folder in "BuyTimeShieldActionExtension" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				Utilities/ManagedSettings.swift,
 				Utilities/SharedData.swift,
 			);
 			target = 2DC6AC212F119023004280A6 /* BuyTimeShieldActionExtension */;

@@ -107,3 +107,11 @@ class ShieldActionExtension: ShieldActionDelegate
 ---
 
 Big Changes INCOMING!!
+
+
+DeviceActivityEvent
+
+We can have a cummulative time spent on the apps instead of being generic. If a user choses to spend 10 minutes on instagram, they can spend that 10 minutes whenever they want. 
+
+For the DeviceActivityEvent - we create another schedule and include the event to it, which is the DeviceActivityEvent with the threshhold and the apps to be blocked off. 
+

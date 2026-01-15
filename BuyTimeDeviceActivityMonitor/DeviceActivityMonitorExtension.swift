@@ -16,24 +16,32 @@ class DeviceActivityMonitorExtension: DeviceActivityMonitor {
     
     let store = ManagedSettingsStore(named: ManagedSettingsStore.Name("buytimeAppRestriction"))
     
+
     override func intervalDidStart(for activity: DeviceActivityName) {
         print("interval started in Device Activity")
         super.intervalDidStart(for: activity)
-        
-        // Handle the start of the interval.
     }
     
     override func intervalDidEnd(for activity: DeviceActivityName) {
         super.intervalDidEnd(for: activity)
-        
-        if activity == DeviceActivityName("com.baalavignesh.buytime.temporaryUnlock") {
-            reapplyRestrictions()
-        }
-        // Handle the end of the interval.
     }
     
     override func eventDidReachThreshold(_ event: DeviceActivityEvent.Name, activity: DeviceActivityName) {
         super.eventDidReachThreshold(event, activity: activity)
+        
+        print("Event threshold reached: \(event.rawValue)")
+        
+        if activity == DeviceActivityName("com.baalavignesh.buytime.earnedTime") {
+            print("Earned time session complete")
+            print("Remaining balance: \(SharedData.earnedTimeMinutes) minutes")
+        }
+        
+        SharedData.earnedTimeEventActive = false
+        
+        reapplyRestrictions()
+        
+        let center = DeviceActivityCenter()
+        center.stopMonitoring([activity])
         
         // Handle the event reaching its threshold.
     }
@@ -63,7 +71,7 @@ class DeviceActivityMonitorExtension: DeviceActivityMonitor {
         store.shield.applicationCategories = selection.categoryTokens.isEmpty ? nil : .specific(selection.categoryTokens)
         store.shield.webDomains = selection.webDomainTokens.isEmpty ? nil : selection.webDomainTokens
         
-        print("Shields re-applied after temporary unlock expired")
+        print("Shields re-applied after user spends their earned time")
     }
 
 }

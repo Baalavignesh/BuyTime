@@ -12,8 +12,12 @@ struct HomeView: View {
     @State var path = NavigationPath()
     
     var body: some View {
-        Button("Allow ScreenTime Access") {
-            
+        Button("Add 5 minutes") {
+            SharedData.earnedTimeMinutes += 5
+        }.buttonStyle(PrimaryButtonStyle())
+        
+        Button("Set Time to 0") {
+            SharedData.earnedTimeMinutes = 0
         }.buttonStyle(PrimaryButtonStyle())
     }
 }

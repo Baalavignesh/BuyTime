@@ -13,29 +13,11 @@ import DeviceActivity
 
 class AppBlockUtils {
 
-    static let blockerActivityName = DeviceActivityName("com.baalavignesh.buytime.blockerActivity")
+    static let earnedTimeActivityName = DeviceActivityName("com.baalavignesh.buytime.earnedTime")
+    static let earnedTimeEventName = DeviceActivityEvent.Name("com.baalavignesh.buytime.earnedTimeEvent")
 
     let store = ManagedSettingsStore(named: ManagedSettingsStore.Name("buytimeAppRestriction"))
     let center = DeviceActivityCenter()
-    
-    
-    func startMonitoringSchedule() {
-        let schedule = DeviceActivitySchedule(intervalStart: DateComponents(hour: 0, minute: 0), intervalEnd: DateComponents(hour: 0, minute: 0), repeats: true, warningTime: nil)
-        
-        do {
-            try center.startMonitoring(Self.blockerActivityName, during: schedule)
-            print("Monitoring Started")
-        } catch {
-            print("Error starting Device Activity monitoring")
-        }
-    }
-    
-    func stopMonitoring() {
-        center.stopMonitoring([
-            Self.blockerActivityName
-        ])
-        print("Monitoring stopped")
-    }
     
     func applyRestrictions(selection: FamilyActivitySelection) {
         let applicationTokens = selection.applicationTokens
@@ -56,4 +38,51 @@ class AppBlockUtils {
         
         print("Restriction Removed")
     }
+    
+    func startEarnedTimeMonitoring(minutes: Int) {
+        guard minutes > 0 else {
+            print("Invalid time amount: \(minutes)")
+            return
+        }
+        
+        let selection = SharedData.blockedAppsSelection
+            guard !selection.applicationTokens.isEmpty ||
+                    !selection.categoryTokens.isEmpty ||
+                    !selection.webDomainTokens.isEmpty else {
+                print("No apps selected to monitor")
+                return
+            }
+                
+        // Step 1: Remove shields to allow app usage
+        removeRestriction()
+        
+        let schedule = DeviceActivitySchedule(
+            intervalStart: DateComponents(hour: 0, minute: 0),
+            intervalEnd: DateComponents(hour: 23, minute: 59),
+            repeats: true,
+            warningTime: nil
+        )
+        
+        let event = DeviceActivityEvent(
+            applications: selection.applicationTokens,
+            categories: selection.categoryTokens,
+            webDomains: selection.webDomainTokens,
+            threshold: DateComponents(minute: minutes),
+        )
+        
+        do {
+            try center.startMonitoring(
+                Self.earnedTimeActivityName,
+                during: schedule,
+                events: [Self.earnedTimeEventName: event]
+            )
+            SharedData.earnedTimeEventActive = true
+            print("Started earned time monitoring: \(minutes) minutes")
+            print("Tracking \(selection.applicationTokens.count) apps")
+        } catch {
+            print("Failed to start earned time monitoring: \(error)")
+        }
+        
+    }
+
 }
