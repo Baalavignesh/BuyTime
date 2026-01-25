@@ -20,6 +20,12 @@ class SharedData {
         case earnedTimeEventActive = "earnedTimeEventActive"
         case spendAmount = "spendAmount"
         
+        
+        case userBalanceValues = "userBalanceValues"
+        
+        case currentFocusDuration = "currentFocusDuration"
+        case currentRewardDuration = "currentRewardDuration"
+        
     }
     
 //    Blocked App Selection
@@ -45,6 +51,17 @@ class SharedData {
             }
         }
     }
+    
+    static var userBalanceValues: [String: Int] {
+        get {
+            defaultsGroup?.integer(forKey: Keys.userBalanceValues.rawValue) as? [String: Int] ?? [:]
+        }
+        set {
+            defaultsGroup?.set(newValue, forKey: Keys.userBalanceValues.rawValue)
+        }
+    }
+    
+    
     
     static var earnedTimeMinutes: Int {
         get {

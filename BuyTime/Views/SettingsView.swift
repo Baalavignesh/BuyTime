@@ -22,16 +22,7 @@ struct SettingsView: View {
                         Label("Personal Info", systemImage: "person.circle")
                     }
                     
-                    Button { isPresented = true } label: {
-                        HStack {
-                            Label("Blocked Apps", systemImage: "apps.iphone.badge.plus")
-                            Spacer()
-                        }
-                        .contentShape(Rectangle())
-                    }
-                    .buttonStyle(.plain)
-                           .familyActivityPicker(isPresented: $isPresented,
-                                                selection: $selection)
+
                     Button {
                         Task {
                             await handleLogout()
@@ -44,6 +35,24 @@ struct SettingsView: View {
                         .contentShape(Rectangle())
                     }
                     .buttonStyle(.plain)
+                }
+                
+                Section("Preference") {
+                    Button { isPresented = true } label: {
+                        HStack {
+                            Label("Blocked Apps", systemImage: "apps.iphone.badge.plus")
+                            Spacer()
+                        }
+                        .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                           .familyActivityPicker(isPresented: $isPresented,
+                                                selection: $selection)
+                    
+                    NavigationLink(value: "Reward Time") {
+                        Label("Edit Reward Time", systemImage: "creditcard.rewards")
+                    }
+                    
                 }
                 Section("Support") {
                     Label("Get Help", systemImage: "questionmark.circle")
@@ -60,6 +69,11 @@ struct SettingsView: View {
                 }
                 
             }.navigationBarTitle(Text("Settings"))
+            .navigationDestination(for: String.self) { value in
+                if value == "Reward Time" {
+                    RewardModification()
+                }
+            }
         }.onChange(of: selection) { oldValue, newValue in
             SharedData.blockedAppsSelection = newValue
             print("Saved \(newValue.applicationTokens.count) apps")
