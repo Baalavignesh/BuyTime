@@ -16,16 +16,15 @@ class SharedData {
     enum Keys: String {
         case blockedApps = "blockedAppsSelection"
 
-        case earnedTimeMinutes = "earnedTimeMinutes"
+        
         case earnedTimeEventActive = "earnedTimeEventActive"
+        
+
+        case currentEventTimeLeft = "currentEventTimeLeft"
+        case earnedTimeMinutes = "earnedTimeMinutes"
         case spendAmount = "spendAmount"
         
-        
         case userBalanceValues = "userBalanceValues"
-        
-        case currentFocusDuration = "currentFocusDuration"
-        case currentRewardDuration = "currentRewardDuration"
-        
     }
     
 //    Blocked App Selection
@@ -65,10 +64,12 @@ class SharedData {
     
     static var earnedTimeMinutes: Int {
         get {
-            defaultsGroup?.integer(forKey: Keys.earnedTimeMinutes.rawValue) ?? 0
+            defaultsGroup?.synchronize()
+            return defaultsGroup?.integer(forKey: Keys.earnedTimeMinutes.rawValue) ?? 0
         }
         set {
             defaultsGroup?.set(max(0, newValue), forKey: Keys.earnedTimeMinutes.rawValue)
+            defaultsGroup?.synchronize()
         }
     }
     
@@ -84,7 +85,7 @@ class SharedData {
     static var spendAmount: Int {
         get {
             let value = defaultsGroup?.integer(forKey: Keys.spendAmount.rawValue) ?? 0
-            return value > 0 ? value : 5  // Default to 5 if not set or invalid
+            return value > 0 ? value : 1  // Default to 1 if not set or invalid
         }
         set {
             defaultsGroup?.set(max(1, newValue), forKey: Keys.spendAmount.rawValue)

@@ -67,6 +67,8 @@ class DeviceActivityMonitorExtension: DeviceActivityMonitor {
     private func reapplyRestrictions() {
         let selection = SharedData.blockedAppsSelection
         
+        store.clearAllSettings()
+
         store.shield.applications = selection.applicationTokens.isEmpty ? nil : selection.applicationTokens
         store.shield.applicationCategories = selection.categoryTokens.isEmpty ? nil : .specific(selection.categoryTokens)
         store.shield.webDomains = selection.webDomainTokens.isEmpty ? nil : selection.webDomainTokens

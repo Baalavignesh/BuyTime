@@ -70,6 +70,18 @@ struct ContentView: View {
 
 extension ContentView {
     
+  func printJWTToken(context: String) async {
+    do {
+      if let session = Clerk.shared.session {
+        let token = try await session.getToken()
+        print("JWT Token (\(context)):")
+        print(token?.jwt ?? "No token available")
+      }
+    } catch {
+      print("Failed to get JWT token: \(error)")
+    }
+  }
+    
   func signInWithOAuth(provider: OAuthProvider) async {
     do {
       // Start the sign-in process using the selected OAuth provider.
@@ -86,7 +98,7 @@ extension ContentView {
         case .complete:
           // If sign-in process is complete, Clerk will automatically update the session
           // and the view will reactively show HomeView
-          dump(Clerk.shared.session)
+          await printJWTToken(context: "Sign-in complete")
         default:
           // If the status is not complete, check why. User may need to
           // complete further steps.
@@ -97,7 +109,7 @@ extension ContentView {
         case .complete:
           // If sign-up process is complete, Clerk will automatically update the session
           // and the view will reactively show HomeView
-          dump(Clerk.shared.session)
+          await printJWTToken(context: "Sign-up complete")
         default:
           // If the status is not complete, check why. User may need to
           // complete further steps.

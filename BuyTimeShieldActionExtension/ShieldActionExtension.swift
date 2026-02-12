@@ -15,6 +15,7 @@ import DeviceActivity
 // Make sure that your class name matches the NSExtensionPrincipalClass in your Info.plist.
 class ShieldActionExtension: ShieldActionDelegate {
 
+    private let timeManager = TimeBalanceManager.shared
     let store = ManagedSettingsStore(named: ManagedSettingsStore.Name("buytimeAppRestriction"))
     
     // Action for Application
@@ -57,7 +58,8 @@ class ShieldActionExtension: ShieldActionDelegate {
             return
         }
         
-        SharedData.earnedTimeMinutes = currentBalance - spendAmount
+        timeManager.setMinutes(currentBalance - spendAmount)
+
         let blockUtils = AppBlockUtils()
         
         blockUtils.startEarnedTimeMonitoring(minutes: spendAmount)

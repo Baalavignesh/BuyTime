@@ -16,15 +16,6 @@ class ShieldConfigurationExtension: ShieldConfigurationDataSource {
 
     private let sharedDefaults = UserDefaults(suiteName: "group.com.baalavignesh.buytime")
     
-    private func getWalletTime() -> Int {
-        return sharedDefaults?.integer(forKey: "earnedTimeMinutes") ?? 0
-    }
-    
-    private func getSpendAmount() -> Int {
-        let value = sharedDefaults?.integer(forKey: "spendAmount") ?? 0
-        return value > 0 ? value : 5
-    }
-    
     private func formatTime(_ minutes: Int) -> String {
             if minutes >= 60 {
                 let hours = minutes / 60
@@ -36,8 +27,8 @@ class ShieldConfigurationExtension: ShieldConfigurationDataSource {
     
     private func buildConfig(appName: String?) -> ShieldConfiguration {
         
-        let walletTime = getWalletTime()
-        let spendAmount = getSpendAmount()
+        let walletTime = SharedData.earnedTimeMinutes
+        let spendAmount = SharedData.spendAmount
         
         let displayName = appName ?? "This app"
         
