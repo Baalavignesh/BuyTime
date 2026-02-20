@@ -229,7 +229,7 @@ Content-Type: application/json
 
 | Field | Type | Required | Notes |
 |-------|------|----------|-------|
-| `focusDurationMinutes` | `integer` | No | Must be between 1 and 240 |
+| `focusDurationMinutes` | `integer` | No | Must be between 15 and 60 |
 | `focusMode` | `string` | No | One of: `fun`, `easy`, `medium`, `hard` |
 
 **Response (200):**
@@ -341,8 +341,8 @@ func waitForUserCreation(maxRetries: Int = 5) async throws -> UserProfile {
 
 | Mode | Multiplier | Reward per 60min focus |
 |------|-----------|----------------------|
-| `fun` | 150% | 90 min |
-| `easy` | 100% | 60 min |
+| `fun` | 100% | 60 min |
+| `easy` | 75% | 45 min |
 | `medium` | 50% | 30 min |
 | `hard` | 25% | 15 min |
 
@@ -356,5 +356,5 @@ func waitForUserCreation(maxRetries: Int = 5) async throws -> UserProfile {
 
 ---
 
-*Last updated: February 18, 2026 — Phase 1, 2 + Preferences*
+*Last updated: February 20, 2026 — Phase 1, 2 + Preferences. Focus modes revised to 100/75/50/25%, max reward 60 min.*
 *Endpoints will be added here as new phases are implemented.*

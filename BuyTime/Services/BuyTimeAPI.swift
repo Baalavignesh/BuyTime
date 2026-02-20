@@ -170,6 +170,29 @@ class BuyTimeAPI {
         try await makeRequest(endpoint: "/api/users/me", method: "DELETE")
     }
     
+    struct UserPreferences: Decodable {
+        let focusDurationMinutes: Int
+        let focusMode: String
+        let updatedAt: String
+    }
+    
+    private struct PreferencesBody: Encodable {
+        let focusDurationMinutes: Int
+        let focusMode: String
+    }
+    
+    func getPreferences() async throws -> UserPreferences {
+        try await makeRequest(endpoint: "/api/preferences")
+    }
+    
+    func updatePreferences(focusDurationMinutes: Int, focusMode: String) async throws -> UserPreferences {
+        let body = try JSONEncoder().encode(
+            PreferencesBody(focusDurationMinutes: focusDurationMinutes, focusMode: focusMode)
+        )
+        
+        return try await makeRequest(endpoint: "/api/preferences", method: "PATCH", body: body)
+    }
+    
     // MARK: - Retry Helper for Webhook Timing
     
     /// After sign-up, the webhook needs time to create the user in the database.

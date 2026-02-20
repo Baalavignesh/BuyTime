@@ -13,14 +13,16 @@ import GoogleSignInSwift
 
 
 struct ContentView: View {
+    let isClerkLoaded: Bool
     @Environment(\.clerk) private var clerk
     @Environment(\.colorScheme) private var colorScheme
-    
+
     var body: some View {
-        // Clerk automatically handles authentication state
-        // If user is signed in, show HomeView
-        // Otherwise, show sign-in buttons
-        if clerk.session != nil {
+        if !isClerkLoaded {
+            // Clerk is still restoring the session — show nothing to avoid
+            // flashing the auth screen for already signed-in users.
+            Color.black.ignoresSafeArea()
+        } else if clerk.session != nil {
             ParentView()
         } else {
             VStack {
@@ -69,19 +71,7 @@ struct ContentView: View {
 }
 
 extension ContentView {
-    
-  func printJWTToken(context: String) async {
-    do {
-      if let session = Clerk.shared.session {
-        let token = try await session.getToken()
-        print("JWT Token (\(context)):")
-        print(token?.jwt ?? "No token available")
-      }
-    } catch {
-      print("Failed to get JWT token: \(error)")
-    }
-  }
-    
+
   func signInWithOAuth(provider: OAuthProvider) async {
     do {
       // Start the sign-in process using the selected OAuth provider.
@@ -96,9 +86,7 @@ extension ContentView {
       case .signIn(let signIn):
         switch signIn.status {
         case .complete:
-          // If sign-in process is complete, Clerk will automatically update the session
-          // and the view will reactively show HomeView
-          await printJWTToken(context: "Sign-in complete")
+          break // Clerk automatically updates the session; view reacts
         default:
           // If the status is not complete, check why. User may need to
           // complete further steps.
@@ -107,9 +95,7 @@ extension ContentView {
       case .signUp(let signUp):
         switch signUp.status {
         case .complete:
-          // If sign-up process is complete, Clerk will automatically update the session
-          // and the view will reactively show HomeView
-          await printJWTToken(context: "Sign-up complete")
+          break // Clerk automatically updates the session; view reacts
         default:
           // If the status is not complete, check why. User may need to
           // complete further steps.
@@ -125,5 +111,5 @@ extension ContentView {
 }
 
 #Preview {
-    ContentView()
+    ContentView(isClerkLoaded: true)
 }
