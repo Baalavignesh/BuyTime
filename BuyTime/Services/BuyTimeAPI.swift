@@ -60,12 +60,11 @@ class BuyTimeAPI {
         // getToken() automatically handles refresh:
         // - Returns cached token if still valid
         // - Fetches new token if cached one expires within 10 seconds (default buffer)
-        guard let tokenResponse = try await session.getToken(),
-              let jwt = tokenResponse.jwt else {
+        guard let tokenResponse = try await session.getToken() else {
             throw APIError.unauthorized
         }
         
-        return jwt
+        return tokenResponse.jwt
     }
     
     /// Force refresh the token (use when you know server-side data changed)
@@ -75,12 +74,11 @@ class BuyTimeAPI {
         }
         
         // skipCache: true forces a network request for a fresh token
-        guard let tokenResponse = try await session.getToken(.init(skipCache: true)),
-              let jwt = tokenResponse.jwt else {
+        guard let tokenResponse = try await session.getToken(.init(skipCache: true)) else {
             throw APIError.unauthorized
         }
         
-        return jwt
+        return tokenResponse.jwt
     }
     
     // MARK: - Request Helpers

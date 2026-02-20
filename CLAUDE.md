@@ -65,3 +65,18 @@ Uses Clerk for OAuth (Google + Apple sign-in). Configuration is in `BuyTimeApp.s
 - `FamilyActivitySelection` must be JSON encoded/decoded for UserDefaults storage
 - Shield UI reads balance directly from SharedData on each render (no persistent state)
 - `DeviceActivityCenter` uses named schedules/events (`AppBlockUtils.earnedTimeScheduleName`)
+
+## Documentation Policy
+
+When making **significant changes** to the codebase — such as modifying core logic, adding/removing features, changing architecture, updating APIs, or altering data flows — **you must update the relevant documentation** in `BuyTime/Docs/` if that folder exists.
+
+**What counts as significant:**
+- Changes to SharedData keys/properties → update `Variables.md`
+- Changes to API endpoints or backend communication → update `API_REFERENCE.md`
+- Changes to the earned time flow, wallet system, or extension logic → update `DEVICE_ACTIVITY_EVENT_PLAN_FINAL.md`
+- New files, new extensions, or architectural changes → update the relevant doc or create a new one in `BuyTime/Docs/`
+
+**What does NOT need doc updates:**
+- UI-only tweaks (colors, layout, styling)
+- Bug fixes that don't change behavior
+- Refactors that don't change the public interface

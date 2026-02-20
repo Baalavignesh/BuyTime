@@ -18,7 +18,7 @@ struct ClerkQuickstartApp: App {
             ContentView()
                 .environment(\.clerk, clerk)
                 .task {
-                    clerk.configure(publishableKey: Secrets.clerkPublishableKey)
+                    clerk.configure(publishableKey: "pk_test_c2hhcmluZy1pbXBhbGEtNTUuY2xlcmsuYWNjb3VudHMuZGV2JA")
                     try? await clerk.load()
                     
                     // Print JWT token if session exists on app launch
