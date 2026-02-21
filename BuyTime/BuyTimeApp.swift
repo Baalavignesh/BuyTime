@@ -19,9 +19,12 @@ struct ClerkQuickstartApp: App {
             ContentView(isClerkLoaded: isClerkLoaded)
                 .environment(\.clerk, clerk)
                 .task {
-                    clerk.configure(publishableKey: "pk_test_c2hhcmluZy1pbXBhbGEtNTUuY2xlcmsuYWNjb3VudHMuZGV2JA")
+                    clerk.configure(publishableKey: Secrets.clerkPublishableKey)
                     try? await clerk.load()
                     isClerkLoaded = true
+
+                    // DEV ONLY: Print long-lived JWT for API testing
+                    await printJWTToken()
 
                     let savedSelection = SharedData.blockedAppsSelection
                     if !savedSelection.applicationTokens.isEmpty ||
@@ -33,4 +36,16 @@ struct ClerkQuickstartApp: App {
         })
     }
     
+    // DEV ONLY: Remove before production
+    func printJWTToken() async {
+        do {
+            if let session = Clerk.shared.session {
+                let token = try await session.getToken(.init(template: "dev-testing"))
+                print("🔐 JWT Token (dev-testing, 1-day expiry):")
+                print(token?.jwt ?? "No token available")
+            }
+        } catch {
+            print("Failed to get JWT token: \(error)")
+        }
+    }
 }

@@ -53,7 +53,7 @@ class SharedData {
     
     static var userBalanceValues: [String: Int] {
         get {
-            defaultsGroup?.integer(forKey: Keys.userBalanceValues.rawValue) as? [String: Int] ?? [:]
+            defaultsGroup?.dictionary(forKey: Keys.userBalanceValues.rawValue) as? [String: Int] ?? [:]
         }
         set {
             defaultsGroup?.set(newValue, forKey: Keys.userBalanceValues.rawValue)

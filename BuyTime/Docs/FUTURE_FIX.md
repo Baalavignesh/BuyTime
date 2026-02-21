@@ -23,3 +23,30 @@
 - [ ] **Planned endpoints stub in API_REFERENCE.md** — As Phase 3+ endpoints (session tracking, balance deduction, spending history) are built, add them to `API_REFERENCE.md` immediately. Consider adding a `## Planned` section now as a placeholder to avoid the doc going stale.
 
 - [ ] **Client-side guard for empty `PATCH /api/preferences`** — `BuyTimeAPI.updatePreferences(focusDurationMinutes:focusMode:)` accepts both params as optional. If both are `nil`, the call will hit a 400. Add a guard at the call site (or inside the function) to no-op early if both values are nil.
+
+---
+
+## Balance Sync
+
+- [ ] **Sign-out cache invalidation** — On sign-out, clear `balance_lastAPIValue` from `UserDefaults.standard`. Otherwise the delta model will compute an incorrect `pendingDelta` for the next user session or after re-login. Mirror the same pattern needed for `preferences_*` keys (see above).
+
+- [ ] **Offline first-launch fallback** — If `lastAPIValue == -1` (never synced) and the device is offline, `onAppear()` fires a GET that fails silently. Balance shows 0. Define a timeout so the VM retries on the next `onForeground()` without the user needing to pull-to-refresh.
+
+---
+
+## Dead Code
+
+- [ ] **`AppPickerView.swift`** — This view is never referenced anywhere. The app selection flow is handled inline in `ParentView`. Safe to delete once confirmed.
+
+- [ ] **`SharedData.userBalanceValues`** — Property is defined and the `Keys.userBalanceValues` case exists, but neither is called anywhere in the codebase. If this was intended for the 8-8-8 focus/reward configuration, implement it; otherwise remove both the property and the key.
+
+---
+
+## Pre-Launch Checklist
+
+- [ ] **Remove dev-only code** — Before shipping:
+  - `BuyTimeApp.swift`: delete `printJWTToken()` and its call site (prints JWT to console)
+  - `HomeView.swift`: remove the "Add 5 minutes" and "Set Time to 0" debug buttons
+  - `BalanceViewModel.swift`: remove `debugSetMinutes()` or gate it behind `#if DEBUG`
+
+- [ ] **Reset Clerk JWT token lifetime** — Token lifetime was increased for development/API testing. Before going to production, go to **Clerk Dashboard → Sessions** and reset the JWT token lifetime back to the default (**60 seconds**). A long-lived JWT is a security risk — if leaked, it can be used until it expires.

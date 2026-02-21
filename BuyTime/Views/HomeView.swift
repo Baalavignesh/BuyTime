@@ -9,23 +9,32 @@ import SwiftUI
 
 struct HomeView: View {
   @State var path = NavigationPath()
-  @ObservedObject private var timeManager = TimeBalanceManager.shared
+  @StateObject private var balanceVM = BalanceViewModel()
   @Environment(\.scenePhase) private var scenePhase
 
   var body: some View {
-    VStack {
-      BuyTimeCard(timeBalance: timeManager.earnedTimeMinutes).padding(.top, 32)
-      Spacer()
-      Button("Add 5 minutes") {
-        timeManager.addMinutes(1)
-      }.buttonStyle(PrimaryButtonStyle())
+    ScrollView {
+      VStack {
+        BuyTimeCard(timeBalance: balanceVM.availableMinutes).padding(.top, 32)
+        Spacer()
+        Button("Add 5 minutes") {
+          balanceVM.addMinutes(5)
+        }.buttonStyle(PrimaryButtonStyle())
 
-      Button("Set Time to 0") {
-        timeManager.setMinutes(0)
-      }.buttonStyle(PrimaryButtonStyle())
-    }.onChange(of: scenePhase) { oldPhase, newPhase in
+        Button("Set Time to 0") {
+          balanceVM.debugSetMinutes(0)
+        }.buttonStyle(PrimaryButtonStyle())
+      }
+    }
+    .refreshable {
+      await balanceVM.refresh()
+    }
+    .onAppear {
+      balanceVM.onAppear()
+    }
+    .onChange(of: scenePhase) { _, newPhase in
       if newPhase == .active {
-        timeManager.refreshFromSharedData()
+        balanceVM.onForeground()
       }
     }
   }

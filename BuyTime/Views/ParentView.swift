@@ -7,7 +7,7 @@
 
 import SwiftUI
 import FamilyControls
-internal import Combine
+import Combine
 
 struct ParentView: View {
     @StateObject var authManager = AuthorizationManager()

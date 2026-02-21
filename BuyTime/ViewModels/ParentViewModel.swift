@@ -7,7 +7,7 @@
 
 import Foundation
 import FamilyControls
-internal import Combine
+import Combine
 
 @MainActor
 class AuthorizationManager: ObservableObject {

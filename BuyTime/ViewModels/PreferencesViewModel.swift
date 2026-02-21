@@ -11,7 +11,7 @@
 import Foundation
 
 import SwiftUI
-internal import Combine
+import Combine
 
 class PreferencesViewModel: ObservableObject {
     

@@ -193,6 +193,38 @@ class BuyTimeAPI {
         return try await makeRequest(endpoint: "/api/preferences", method: "PATCH", body: body)
     }
     
+    // MARK: - Balance Endpoints
+
+    struct Balance: Decodable {
+        let availableMinutes: Int
+        let currentStreakDays: Int
+        let lastSessionDate: String?
+        let updatedAt: String
+        let today: TodayStats?
+
+        struct TodayStats: Decodable {
+            let earnedMinutes: Int
+            let spentMinutes: Int
+            let sessionsCompleted: Int
+            let sessionsFailed: Int
+        }
+    }
+
+    private struct UpdateBalanceBody: Encodable {
+        let availableMinutes: Int
+    }
+
+    /// GET /api/balance
+    func getBalance() async throws -> Balance {
+        try await makeRequest(endpoint: "/api/balance")
+    }
+
+    /// PATCH /api/balance
+    func updateBalance(availableMinutes: Int) async throws -> Balance {
+        let body = try JSONEncoder().encode(UpdateBalanceBody(availableMinutes: availableMinutes))
+        return try await makeRequest(endpoint: "/api/balance", method: "PATCH", body: body)
+    }
+
     // MARK: - Retry Helper for Webhook Timing
     
     /// After sign-up, the webhook needs time to create the user in the database.

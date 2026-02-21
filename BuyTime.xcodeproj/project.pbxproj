@@ -90,7 +90,6 @@
 				Assets/dark_logo.png,
 				Utilities/ManagedSettings.swift,
 				Utilities/SharedData.swift,
-				Utilities/TimeBalanceManager.swift,
 			);
 			target = 2DC6ABE12F0C502C004280A6 /* BuyTimeShield */;
 		};
@@ -106,7 +105,6 @@
 			membershipExceptions = (
 				Utilities/ManagedSettings.swift,
 				Utilities/SharedData.swift,
-				Utilities/TimeBalanceManager.swift,
 			);
 			target = 2DC6AC212F119023004280A6 /* BuyTimeShieldActionExtension */;
 		};
@@ -114,7 +112,6 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Utilities/SharedData.swift,
-				Utilities/TimeBalanceManager.swift,
 			);
 			target = 2DC6ABF82F0C5395004280A6 /* BuyTimeDeviceActivityMonitor */;
 		};
