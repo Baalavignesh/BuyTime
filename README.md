@@ -1,117 +1,126 @@
-FamilyControls asks the user for permission and what to block. ManagedSettings sets up the actual block. DeviceActivity controls when that block is turned on and off.
+# BuyTime
 
-##FamilyControls
+A wallet-based screen time management app for iOS. Earn minutes by focusing, spend them to temporarily unlock blocked apps.
 
-Authorization: The mechanism to request permission from the user to manage their app and web activity.
+## Why BuyTime?
 
-- UI components (FamilyActivityPicker) to pick the apps
+Most screen time apps feel punishing — you set limits, break them, and eventually uninstall. BuyTime flips the model: you **earn** time through focused work and **spend** it like currency. This makes managing screen time feel rewarding instead of restrictive.
 
-##ManagedSettings
+## How It Works
 
-This framework is the enforcer. ManagedSettings lets you define the actual rules. 
+1. **Sign in** with Google or Apple
+2. **Select apps** to block (Instagram, TikTok, YouTube, etc.)
+3. **Configure** your focus duration and reward mode
+4. **Focus** for your set duration to earn minutes
+5. **Spend** earned minutes from the shield screen to temporarily unlock apps
+6. Apps **re-lock** automatically once your earned time runs out
 
-- Shield Apps & Websites: Prevent selected apps from being launched or shield specific web domains in Safari.
+## Features
 
-- Set App Time Limits: (Though not shown in our primary example code, ManagedSettings also enables setting time limits).
+- **Wallet System** — Earned minutes are stored as a spendable balance
+- **Custom Shield UI** — Blocked apps show your balance and a "Spend X minutes" button
+- **Flexible Rewards** — Four difficulty modes control how much time you earn:
+  - Fun (100%) · Easy (75%) · Medium (50%) · Hard (25%)
+- **Focus/Reward Configuration** — Adjustable focus duration (15–60 min) with automatic reward calculation
+- **Cloud Sync** — Balance syncs across sessions via a REST backend with delta-based updates
+- **Offline-First** — Balance displays instantly from local state; API syncs in the background
 
+## Tech Stack
 
-##DeviceActivityMonitor
+| Layer | Technology |
+|-------|-----------|
+| UI | SwiftUI |
+| App Blocking | FamilyControls, ManagedSettings |
+| Usage Monitoring | DeviceActivity (DeviceActivityEvent) |
+| Auth | Clerk (Google + Apple OAuth) |
+| Backend | REST API with JWT auth |
+| State Sharing | AppGroup UserDefaults |
 
-The object that monitors scheduled device activity.
+## Architecture
 
-- This Target helps to know when a app is reaching a time limit. This Target runs in the background constantly checking if it meets the requirement set. 
-
-- This framework determines when the rules defined in *ManagedSettings* should be active.
-
-- Note: Shielding an app dims the app’s icon on the homescreen and applies an hourglass symbol. When the app launches, the system covers it with a view that your app can configure.
-
-
-----
-
-UserDefault is the way to store data locally on the device, more like localStorage in browser. There are 2 types.
-
-1. Standard
-2. Shared
-
-It is a key value pair storage. The standard is normal way of storing but the shared is used when we have extensions and these needs to be shared across multiple extensions. We can do that by creating an AppGroup. 
-
-AppGroup must be created by going to the apple developer account and go to identifiers and create a group. Once created, create capabilities in main app and select AppGroups and we can see this AppGroup created. 
+The project has four targets that communicate via an AppGroup:
 
 ```
-    static var blockedAppsSelection: FamilyActivitySelection {
-        get {
-            guard let data = defaultsGroup?.data(forKey: Keys.blockedApps.key) else {
-                return FamilyActivitySelection()
-            }
-            
-            do {
-                return try JSONDecoder().decode(FamilyActivitySelection.self, from: data)
-            } catch {
-                print("Failed to decode FamilyActivitySelection: \(error)")
-                return FamilyActivitySelection()
-            }
-        }
-        set {
-            do {
-                let data = try JSONEncoder().encode(newValue)
-                defaultsGroup?.set(data, forKey: Keys.blockedApps.key)
-            } catch {
-                print("Failed to encode FamilyActivitySelection: \(error)")
-            }
-        }
-    }
+┌──────────────┐     SharedData (AppGroup UserDefaults)     ┌──────────────────────────┐
+│   Main App   │ ◄─────────────────────────────────────────► │ DeviceActivityMonitor    │
+│  (UI + API)  │                                             │ (re-blocks after timeout) │
+└──────────────┘                                             └──────────────────────────┘
+       ▲                                                              ▲
+       │                    ┌──────────────────┐                      │
+       └────────────────────│   SharedData     │──────────────────────┘
+                            │  (UserDefaults)  │
+       ┌────────────────────│                  │──────────────────────┐
+       ▼                    └──────────────────┘                      ▼
+┌──────────────┐                                             ┌──────────────────────────┐
+│ Shield UI    │                                             │ ShieldAction Extension   │
+│ (blocked     │                                             │ (handles "Spend" tap,    │
+│  app screen) │                                             │  deducts balance)        │
+└──────────────┘                                             └──────────────────────────┘
 ```
 
-In this, the data that is stored from the FamilyPicker is of type Codable, so we should encode it and then store it as data. Same way to get the data, we decode and get the data as JSON. 
+### Key Components
 
+| Component | Location | Purpose |
+|-----------|----------|---------|
+| `SharedData` | `Utilities/SharedData.swift` | AppGroup UserDefaults wrapper shared across all targets |
+| `AppBlockUtils` | `Utilities/ManagedSettings.swift` | Applies/removes app restrictions and starts monitoring |
+| `BalanceViewModel` | `ViewModels/BalanceViewModel.swift` | Balance management with delta-based API sync |
+| `PreferencesViewModel` | `ViewModels/PreferencesViewModel.swift` | Focus/reward duration with debounced saves and caching |
+| `BuyTimeAPI` | `Services/BuyTimeAPI.swift` | REST client with Clerk JWT authentication |
 
+### Earned Time Flow
 
-The file @SharedData.swift has target membership for both main app and the extension. 
+```
+User taps "Spend X minutes" on shield
+  → ShieldActionExtension deducts balance via SharedData
+  → AppBlockUtils removes shields and starts DeviceActivityEvent
+  → User uses unlocked apps
+  → DeviceActivityMonitor fires eventDidReachThreshold()
+  → Shields reapplied, apps blocked again
+```
 
+## Project Structure
 
+```
+BuyTime/
+├── BuyTimeApp.swift              # Entry point, Clerk init
+├── ContentView.swift             # Auth screen
+├── Config/Secrets.swift          # API keys (gitignored)
+├── Models/                       # Data models
+├── ViewModels/                   # MVVM view models
+├── Views/                        # SwiftUI views
+├── Services/BuyTimeAPI.swift     # Backend API client
+├── Utilities/
+│   ├── SharedData.swift          # Cross-target state (AppGroup)
+│   └── ManagedSettings.swift     # App blocking logic
+└── Docs/                         # Internal documentation
 
-ManagedSettingsStore
+BuyTimeDeviceActivityMonitor/     # Monitors usage, re-blocks apps
+BuyTimeShield/                    # Custom blocked-app UI
+BuyTimeShieldActionExtension/     # Handles "Spend" button tap
+```
 
-This is implemented in ManagedSettings.swift. The ManagedSettingsStore defines what the restrictions are and applying and removing it. But it won't do the apply and removing though. 
+## Setup
 
-let store = ManagedSettingsStore(named: ManagedSettingsStore.Name("buytimeAppRestriction"))
+1. Clone the repo
+2. Open `BuyTime.xcodeproj` in Xcode
+3. Create `BuyTime/Config/Secrets.swift` with your API keys:
+   ```swift
+   struct Secrets {
+       static let clerkPublishableKey = "pk_test_..."
+       static let apiBaseURL = "https://your-api.com"
+   }
+   ```
+4. Configure your Apple Developer account with FamilyControls capability
+5. Build and run on a **physical device** (Screen Time APIs don't work in Simulator)
 
-We can apply shield by using the object store.shield.[app or web or category]
+## Requirements
 
-Once the ManagedSettingsStore is defined, we should monitor all these apps using the DeviceActivityCenter
+- iOS 16.1+
+- Xcode 15+
+- Physical iPhone or iPad (Simulator not supported for Screen Time APIs)
+- Apple Developer account with FamilyControls entitlement
 
------
+## License
 
-DeviceActivityCenter
-
-let center = DeviceActivityCenter()
-
-center.startMonitoring or center.stopMonitoring
-
-We should start the monitoring whenever the user changes the blocked app selection and also start when app or system restarts. So it is also defined in BuyTimeApp.swift
-
------
-
-ShieldConfigurationExtension
-
-This is the place where we have the custom shield configuration with different UI and have buttons and define function to apply and remove shield. 
-
-ShieldConfigurationExtension only does the UI changes and nothing more. If you want to have actions implemented then we need to create a target for ShieldActionExtension.
-
-----
-
-ShieldActionExtension
-
-class ShieldActionExtension: ShieldActionDelegate 
-
----
-
-Big Changes INCOMING!!
-
-
-DeviceActivityEvent
-
-We can have a cummulative time spent on the apps instead of being generic. If a user choses to spend 10 minutes on instagram, they can spend that 10 minutes whenever they want. 
-
-For the DeviceActivityEvent - we create another schedule and include the event to it, which is the DeviceActivityEvent with the threshhold and the apps to be blocked off. 
-
+All rights reserved.

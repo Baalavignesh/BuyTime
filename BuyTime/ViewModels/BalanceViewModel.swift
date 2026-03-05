@@ -98,6 +98,24 @@ class BalanceViewModel: ObservableObject {
         Task { await performSync(showSpinner: false) }
     }
 
+    /// Set the balance to an exact absolute value and sync to server.
+    /// Use this for penalty or correction operations that need to bypass the delta mechanism.
+    func setBalance(_ amount: Int) async {
+        let newValue = max(0, amount)
+        SharedData.earnedTimeMinutes = newValue
+        availableMinutes = newValue
+
+        do {
+            let confirmed = try await BuyTimeAPI.shared.updateBalance(availableMinutes: newValue)
+            lastAPIValue = confirmed.availableMinutes
+            SharedData.earnedTimeMinutes = confirmed.availableMinutes
+            availableMinutes = confirmed.availableMinutes
+        } catch {
+            // Optimistically set lastAPIValue so delta stays 0 and we don't double-PATCH
+            lastAPIValue = newValue
+        }
+    }
+
     // MARK: - Debug (remove before production)
 
     func debugSetMinutes(_ amount: Int) {

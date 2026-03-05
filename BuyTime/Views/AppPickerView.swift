@@ -9,7 +9,7 @@ import SwiftUI
 import FamilyControls
 
 struct AppPickerView: View {
-    @State var selection = FamilyActivitySelection()
+    @State private var selection = FamilyActivitySelection()
 
     
     var body: some View {
@@ -18,7 +18,6 @@ struct AppPickerView: View {
         Button("Proceed with Selection") {
 //            hasCompletedAppSelection = true
         }
-        
     }
 }
 

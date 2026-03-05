@@ -111,6 +111,7 @@
 		2DC6AC352F119AF9004280A6 /* Exceptions for "BuyTime" folder in "BuyTimeDeviceActivityMonitor" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				Utilities/ManagedSettings.swift,
 				Utilities/SharedData.swift,
 			);
 			target = 2DC6ABF82F0C5395004280A6 /* BuyTimeDeviceActivityMonitor */;

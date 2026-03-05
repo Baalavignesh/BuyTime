@@ -8,10 +8,18 @@
 import SwiftUI
 
 struct TimeView: View {
+
+    
     var body: some View {
-        RewardModification()
+        Text("Spend Time")
+
     }
+
+
 }
+
+
+
 
 #Preview {
     TimeView()

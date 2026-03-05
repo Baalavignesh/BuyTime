@@ -225,6 +225,75 @@ class BuyTimeAPI {
         return try await makeRequest(endpoint: "/api/balance", method: "PATCH", body: body)
     }
 
+    // MARK: - Session Models
+
+    struct FocusSession: Decodable {
+        let id: String
+        let mode: String
+        let multiplierUsed: Int
+        let status: String
+        let plannedDurationMinutes: Int?
+        let actualDurationMinutes: Int?
+        let rewardMinutes: Int?
+        let startedAt: String
+        let endedAt: String?
+    }
+
+    struct SessionResult: Decodable {
+        let session: FocusSession
+        let balance: SessionBalance
+
+        struct SessionBalance: Decodable {
+            let availableMinutes: Int
+            let currentStreakDays: Int
+        }
+    }
+
+    private struct CurrentSessionData: Decodable {
+        let session: FocusSession?
+    }
+
+    private struct StartSessionBody: Encodable {
+        let sessionId: String
+        let mode: String
+        let plannedDurationMinutes: Int?
+    }
+
+    private struct EndSessionBody: Encodable {
+        let sessionId: String
+        let actualDurationMinutes: Int
+    }
+
+    private struct AbandonSessionBody: Encodable {
+        let sessionId: String
+    }
+
+    // MARK: - Session Endpoints
+
+    /// POST /api/sessions/start
+    func startSession(sessionId: String, mode: String, plannedDurationMinutes: Int?) async throws -> FocusSession {
+        let body = try JSONEncoder().encode(StartSessionBody(sessionId: sessionId, mode: mode, plannedDurationMinutes: plannedDurationMinutes))
+        return try await makeRequest(endpoint: "/api/sessions/start", method: "POST", body: body)
+    }
+
+    /// POST /api/sessions/end
+    func endSession(sessionId: String, actualDurationMinutes: Int) async throws -> SessionResult {
+        let body = try JSONEncoder().encode(EndSessionBody(sessionId: sessionId, actualDurationMinutes: actualDurationMinutes))
+        return try await makeRequest(endpoint: "/api/sessions/end", method: "POST", body: body)
+    }
+
+    /// POST /api/sessions/abandon
+    func abandonSession(sessionId: String) async throws -> FocusSession {
+        let body = try JSONEncoder().encode(AbandonSessionBody(sessionId: sessionId))
+        return try await makeRequest(endpoint: "/api/sessions/abandon", method: "POST", body: body)
+    }
+
+    /// GET /api/sessions/current — returns nil if no session is active
+    func getCurrentSession() async throws -> FocusSession? {
+        let data: CurrentSessionData = try await makeRequest(endpoint: "/api/sessions/current")
+        return data.session
+    }
+
     // MARK: - Retry Helper for Webhook Timing
     
     /// After sign-up, the webhook needs time to create the user in the database.

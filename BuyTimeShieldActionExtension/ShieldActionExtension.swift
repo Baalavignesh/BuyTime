@@ -16,13 +16,13 @@ import DeviceActivity
 class ShieldActionExtension: ShieldActionDelegate {
 
     let store = ManagedSettingsStore(named: ManagedSettingsStore.Name("buytimeAppRestriction"))
-    
+
     // Action for Application
     override func handle(
         action: ShieldAction,
         for application: ApplicationToken,
         completionHandler: @escaping (ShieldActionResponse) -> Void) {
-            
+
         print("ShieldAction triggered: \(action)")
         switch action {
         case .primaryButtonPressed:
@@ -33,35 +33,38 @@ class ShieldActionExtension: ShieldActionDelegate {
             fatalError()
         }
     }
-    
 
     // Action for WebDomain
     override func handle(action: ShieldAction, for webDomain: WebDomainToken, completionHandler: @escaping (ShieldActionResponse) -> Void) {
         completionHandler(.close)
     }
-    
+
     // Action for Category
     override func handle(action: ShieldAction, for category: ActivityCategoryToken, completionHandler: @escaping (ShieldActionResponse) -> Void) {
         completionHandler(.close)
     }
 
     private func handleTemporaryAccess(completionHandler: @escaping (ShieldActionResponse) -> Void) {
-
-        let spendAmount = SharedData.spendAmount
-        let currentBalance = SharedData.earnedTimeMinutes
-        
-        guard currentBalance >= spendAmount else {
-            print("✗ Insufficient balance: need \(spendAmount), have \(currentBalance)")
-            // TODO: Could show a message to user here saying no time left in wallet
+        // Focus always takes priority — spending is blocked during focus sessions
+        if SharedData.isFocusCurrentlyActive {
+            print("Spend blocked: focus session is active")
             completionHandler(.close)
             return
         }
-        
+
+        let spendAmount = SharedData.spendAmount
+        let currentBalance = SharedData.earnedTimeMinutes
+
+        guard currentBalance >= spendAmount else {
+            print("✗ Insufficient balance: need \(spendAmount), have \(currentBalance)")
+            completionHandler(.close)
+            return
+        }
+
         SharedData.earnedTimeMinutes = currentBalance - spendAmount
 
         let blockUtils = AppBlockUtils()
-        
         blockUtils.startEarnedTimeMonitoring(minutes: spendAmount)
         completionHandler(.none)
-}
+    }
 }
