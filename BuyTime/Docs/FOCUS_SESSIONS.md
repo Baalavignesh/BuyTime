@@ -441,7 +441,18 @@ This is the enforcement point. Even if the shield UI somehow showed the spend bu
 
 ---
 
-### 6. `HomeView.swift` — Main App
+### 6. `HomeView.swift` + `FocusViewModel.swift` + `FocusSessionSheet.swift` — Main App
+
+**Architecture:** HomeView owns three `@StateObject` ViewModels:
+- `BalanceViewModel` — wallet balance
+- `PreferencesViewModel` — focus prefs
+- `FocusViewModel(balanceVM:, prefsVM:)` — session lifecycle, injected with the other two
+
+HomeView only holds UI state (sheet/alert booleans, `customMinutes`). All business logic lives in `FocusViewModel`.
+
+**Focus start flow:** Preset buttons (15m/30m/1hr) or custom picker → `FocusSessionSheet` confirmation → swipe-to-start slider → `focusVM.startFocusSession(minutes:)`.
+
+`FocusSessionSheet` is a confirmation sheet that shows duration, mode (from `PreferencesViewModel`), estimated reward, and end time. It uses a `SwipeToStartSlider` (80% threshold) with haptic feedback.
 
 Two UI states:
 
@@ -455,12 +466,16 @@ Two UI states:
 │  ┌──────┐ ┌──────┐ ┌──────┐ ┌────┐ │
 │  │ 15m  │ │ 30m  │ │ 1hr  │ │ ⚙️ │ │  ← custom opens wheel picker
 │  └──────┘ └──────┘ └──────┘ └────┘ │
+│                                     │
+│  Tap preset/custom → FocusSession-  │
+│  Sheet (confirmation) → swipe to    │
+│  start slider → session begins      │
 └─────────────────────────────────────┘
 ```
 
-Custom wheel picker: scrollable minute picker (1–480 min), shown in a sheet or inline picker.
+Custom wheel picker → "Continue" → FocusSessionSheet confirmation → swipe to start.
 
-Mode is **not shown in the UI** — it is always loaded from `GET /api/preferences` (`focusMode` field) before starting the session. The preference default is used silently.
+Mode is **not shown as a selector** — it is loaded from `PreferencesViewModel` (cached from `GET /api/preferences`). Displayed read-only in the confirmation sheet.
 
 **State B — Focus active:**
 
@@ -479,11 +494,9 @@ Mode is **not shown in the UI** — it is always loaded from `GET /api/preferenc
 ```
 
 **Implementation notes:**
-- Countdown uses a `Timer` that fires every second, reading `SharedData.focusEndTime - Date().now`
-- Before starting: fetch `GET /api/preferences` to get the current `focusMode`. Use cached value from `PreferencesViewModel` if available.
-- On `scenePhase → .active`: check `pendingSessionEnd` flag → if true, call `POST /api/sessions/end`, add reward to balance, clear flags
-- On `scenePhase → .active`: check if `isFocusActive` is stale (focusEndTime already passed) → clean up
-- "End Focus Early" calls `endFocusSession(abandoned: true)` which applies the balance penalty then calls `POST /api/sessions/abandon`
+- Countdown uses `focusVM.tick()` called by a 1-second `Timer` via `.onReceive`
+- On `scenePhase → .active`: `focusVM.checkPendingSessionEnd()` handles reward credit + API, `focusVM.drainSyncQueue()` retries failed ops
+- "End Focus Early" calls `focusVM.abandonFocusSession()` which applies the balance penalty then queues `POST /api/sessions/abandon`
 
 ---
 
@@ -636,6 +649,7 @@ the focus session duration — completely unrelated to remainingEarnedTimeMinute
 
 ---
 
-*Last Updated: February 2026*
+*Last Updated: March 2026*
 *Status: Implemented — February 26, 2026*
 *Feature: Focus Sessions v1*
+*Architecture Update: March 2026 — Extracted FocusViewModel, added FocusSessionSheet with swipe-to-start*

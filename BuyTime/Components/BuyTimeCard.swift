@@ -1,0 +1,86 @@
+//
+//  BuyTimeCard.swift
+//  BuyTime
+//
+//  Created by Baalavignesh Arunachalam on 3/5/26.
+//
+
+
+//
+//  BuyTimeCard.swift
+//  BuyTime
+//
+//  Created by Baalavignesh Arunachalam on 3/6/26.
+//
+
+import SwiftUI
+
+struct BuyTimeCard: View {
+
+    let userName: String = "Baalavignesh A"
+    let timeBalance: Int
+    let tier: CardTier = .platinum
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            // App Name - Top Center
+            Text("ByTime")
+                .font(.system(size: 24, weight: .light, design: .rounded))
+                .frame(maxWidth: .infinity)
+                .padding(.top, 40)
+
+            Spacer()
+
+            // Logo - Center
+            Image("dark_logo")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 72, height: 72)
+                .frame(maxWidth: .infinity)
+
+            Spacer()
+
+            // Time Balance
+            HStack(spacing: 6) {
+                Image(systemName: "timer")
+                    .font(.system(size: 12))
+                Text("\(timeBalance) min")
+                    .font(.system(size: 16, weight: .semibold, design: .monospaced))
+            }
+            .padding(.bottom, 12)
+
+            // Bottom Row: Name & Tier
+            HStack {
+                Text(userName)
+                    .font(.system(size: 12, weight: .medium))
+                    .tracking(1.5)
+
+                Spacer()
+
+                Text(tier.rawValue.uppercased())
+                    .font(.system(size: 10, weight: .bold))
+                    .tracking(2)
+            }
+            .padding(.bottom, 20)
+        }
+        .padding(.horizontal, 24)
+        .frame(width: 360, height: 220)
+        .background(tier.gradient)
+        .clipShape(RoundedRectangle(cornerRadius: 16))
+    }
+}
+
+enum CardTier: String {
+    case platinum = "Platinum"
+
+    var gradient: LinearGradient {
+        switch self {
+        case .platinum:
+            return LinearGradient(
+                colors: [Color(.systemGray2), Color(.systemGray4), Color(.systemGray3)],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+        }
+    }
+}
+

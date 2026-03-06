@@ -45,15 +45,15 @@ All responses follow this shape:
 
 ### Common HTTP Status Codes
 
-| Code | Meaning |
-|------|---------|
-| 200  | Success |
-| 201  | Created |
-| 400  | Bad request (invalid body/params) |
-| 401  | Unauthorized (missing or invalid JWT) |
-| 404  | Resource not found |
+| Code | Meaning                                |
+| ---- | -------------------------------------- |
+| 200  | Success                                |
+| 201  | Created                                |
+| 400  | Bad request (invalid body/params)      |
+| 401  | Unauthorized (missing or invalid JWT)  |
+| 404  | Resource not found                     |
 | 409  | Conflict (e.g. session already active) |
-| 500  | Internal server error |
+| 500  | Internal server error                  |
 
 ---
 
@@ -66,6 +66,7 @@ All responses follow this shape:
 No authentication required.
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -86,11 +87,13 @@ No authentication required.
 Get the current authenticated user's profile, balance, and basic stats.
 
 **Headers:**
+
 ```
 Authorization: Bearer <token>
 ```
 
 **Response (200):**
+
 ```json
 {
   "success": true,
@@ -119,23 +122,26 @@ Authorization: Bearer <token>
 Update the current user's display name.
 
 **Headers:**
+
 ```
 Authorization: Bearer <token>
 Content-Type: application/json
 ```
 
 **Request Body:**
+
 ```json
 {
   "displayName": "New Name"
 }
 ```
 
-| Field | Type | Required | Notes |
-|-------|------|----------|-------|
-| `displayName` | `string` | No | Pass to update; omit to leave unchanged |
+| Field         | Type     | Required | Notes                                   |
+| ------------- | -------- | -------- | --------------------------------------- |
+| `displayName` | `string` | No       | Pass to update; omit to leave unchanged |
 
 **Response (200):**
+
 ```json
 {
   "success": true,
@@ -155,11 +161,13 @@ Content-Type: application/json
 Delete the current user's account and all associated data (balance, stats, sessions, spending records). This is irreversible.
 
 **Headers:**
+
 ```
 Authorization: Bearer <token>
 ```
 
 **Response (200):**
+
 ```json
 {
   "success": true,
@@ -178,11 +186,13 @@ Authorization: Bearer <token>
 Get the current user's reward balance and today's computed activity summary.
 
 **Headers:**
+
 ```
 Authorization: Bearer <token>
 ```
 
 **Response (200):**
+
 ```json
 {
   "success": true,
@@ -210,23 +220,26 @@ Authorization: Bearer <token>
 Update the user's available minutes. The iOS app calls this when the user spends screen time on restricted apps.
 
 **Headers:**
+
 ```
 Authorization: Bearer <token>
 Content-Type: application/json
 ```
 
 **Request Body:**
+
 ```json
 {
   "availableMinutes": 90
 }
 ```
 
-| Field | Type | Required | Notes |
-|-------|------|----------|-------|
-| `availableMinutes` | `integer` | Yes | Must be a non-negative integer |
+| Field              | Type      | Required | Notes                          |
+| ------------------ | --------- | -------- | ------------------------------ |
+| `availableMinutes` | `integer` | Yes      | Must be a non-negative integer |
 
 **Response (200):**
+
 ```json
 {
   "success": true,
@@ -252,6 +265,7 @@ These are called by Clerk, not by the iOS app.
 Receives Clerk webhook events (`user.created`, `user.updated`, `user.deleted`). Verified via Svix signature headers.
 
 **What it does for the iOS app:**
+
 - When a user signs up via Clerk in the iOS app, Clerk fires `user.created`
 - The backend automatically creates rows in `users`, `user_balance`, `user_stats`, and `user_preferences`
 - After this, `GET /api/users/me` will return the user's profile
@@ -265,11 +279,13 @@ Receives Clerk webhook events (`user.created`, `user.updated`, `user.deleted`). 
 Get the current user's default focus settings.
 
 **Headers:**
+
 ```
 Authorization: Bearer <token>
 ```
 
 **Response (200):**
+
 ```json
 {
   "success": true,
@@ -288,12 +304,14 @@ Authorization: Bearer <token>
 Update the current user's default focus settings. At least one field must be provided.
 
 **Headers:**
+
 ```
 Authorization: Bearer <token>
 Content-Type: application/json
 ```
 
 **Request Body:**
+
 ```json
 {
   "focusDurationMinutes": 30,
@@ -301,12 +319,13 @@ Content-Type: application/json
 }
 ```
 
-| Field | Type | Required | Notes |
-|-------|------|----------|-------|
-| `focusDurationMinutes` | `integer` | No | Must be between 1 and 240 |
-| `focusMode` | `string` | No | One of: `fun`, `easy`, `medium`, `hard` |
+| Field                  | Type      | Required | Notes                                   |
+| ---------------------- | --------- | -------- | --------------------------------------- |
+| `focusDurationMinutes` | `integer` | No       | Must be between 1 and 240               |
+| `focusMode`            | `string`  | No       | One of: `fun`, `easy`, `medium`, `hard` |
 
 **Response (200):**
+
 ```json
 {
   "success": true,
@@ -329,25 +348,30 @@ Content-Type: application/json
 Start a new focus session. Only one active session is allowed at a time.
 
 **Headers:**
+
 ```
 Authorization: Bearer <token>
 Content-Type: application/json
 ```
 
 **Request Body:**
+
 ```json
 {
+  "sessionId": "client-generated-uuid",
   "mode": "easy",
   "plannedDurationMinutes": 60
 }
 ```
 
-| Field | Type | Required | Notes |
-|-------|------|----------|-------|
-| `mode` | `string` | Yes | One of: `fun`, `easy`, `medium`, `hard` |
-| `plannedDurationMinutes` | `integer` | No | Target duration (1–480). Omit for open-ended sessions |
+| Field                    | Type            | Required | Notes                                                                                   |
+| ------------------------ | --------------- | -------- | --------------------------------------------------------------------------------------- |
+| `sessionId`              | `string` (UUID) | No       | Client-generated UUID. Enables idempotent retries. If omitted, the server generates one |
+| `mode`                   | `string`        | Yes      | One of: `fun`, `easy`, `medium`, `hard`                                                 |
+| `plannedDurationMinutes` | `integer`       | No       | Target duration (1–480). Omit for open-ended sessions                                   |
 
-**Response (201):**
+**Response (201 — new session / 200 — idempotent retry):**
+
 ```json
 {
   "success": true,
@@ -362,9 +386,11 @@ Content-Type: application/json
 }
 ```
 
+**Idempotency:** If `sessionId` is provided and a session with that ID already exists for this user, returns `200` with the existing session instead of creating a duplicate.
+
 **Error (400):** Invalid or missing `mode`, or `plannedDurationMinutes` out of range.
 
-**Error (409):** User already has an active session. End or abandon it first.
+**Error (409):** User already has a _different_ active session. End or abandon it first.
 
 ---
 
@@ -373,12 +399,14 @@ Content-Type: application/json
 Complete a focus session and earn reward minutes. Updates balance and lifetime stats atomically.
 
 **Headers:**
+
 ```
 Authorization: Bearer <token>
 Content-Type: application/json
 ```
 
 **Request Body:**
+
 ```json
 {
   "sessionId": "uuid-string",
@@ -386,12 +414,13 @@ Content-Type: application/json
 }
 ```
 
-| Field | Type | Required | Notes |
-|-------|------|----------|-------|
-| `sessionId` | `string` (UUID) | Yes | ID of the active session to end |
-| `actualDurationMinutes` | `integer` | Yes | Actual focus time reported by the iOS app. Must be ≥ 1 |
+| Field                   | Type            | Required | Notes                                                  |
+| ----------------------- | --------------- | -------- | ------------------------------------------------------ |
+| `sessionId`             | `string` (UUID) | Yes      | ID of the active session to end                        |
+| `actualDurationMinutes` | `integer`       | Yes      | Actual focus time reported by the iOS app. Must be ≥ 1 |
 
 **Response (200):**
+
 ```json
 {
   "success": true,
@@ -418,7 +447,9 @@ Content-Type: application/json
 
 **Error (400):** Missing or invalid fields.
 
-**Error (404):** Session not found, not owned by this user, or not active.
+**Idempotency:** If the session is already completed, returns `200` with the existing completed session data and current balance.
+
+**Error (404):** Session not found or not owned by this user.
 
 ---
 
@@ -427,23 +458,26 @@ Content-Type: application/json
 Abandon an active session with no reward. Increments the failed sessions counter.
 
 **Headers:**
+
 ```
 Authorization: Bearer <token>
 Content-Type: application/json
 ```
 
 **Request Body:**
+
 ```json
 {
   "sessionId": "uuid-string"
 }
 ```
 
-| Field | Type | Required | Notes |
-|-------|------|----------|-------|
-| `sessionId` | `string` (UUID) | Yes | ID of the active session to abandon |
+| Field       | Type            | Required | Notes                               |
+| ----------- | --------------- | -------- | ----------------------------------- |
+| `sessionId` | `string` (UUID) | Yes      | ID of the active session to abandon |
 
 **Response (200):**
+
 ```json
 {
   "success": true,
@@ -457,7 +491,9 @@ Content-Type: application/json
 }
 ```
 
-**Error (404):** Session not found, not owned by this user, or not active.
+**Idempotency:** If the session is already failed/abandoned, returns `200` with the existing session data.
+
+**Error (404):** Session not found or not owned by this user.
 
 ---
 
@@ -466,11 +502,13 @@ Content-Type: application/json
 Get the user's currently active session, if any.
 
 **Headers:**
+
 ```
 Authorization: Bearer <token>
 ```
 
 **Response (200):**
+
 ```json
 {
   "success": true,
@@ -496,21 +534,23 @@ Authorization: Bearer <token>
 Get a paginated list of the user's past sessions.
 
 **Headers:**
+
 ```
 Authorization: Bearer <token>
 ```
 
 **Query Parameters:**
 
-| Param | Type | Default | Notes |
-|-------|------|---------|-------|
-| `limit` | `integer` | `20` | Max results per page (1–100) |
-| `offset` | `integer` | `0` | Pagination offset |
-| `status` | `string` | all | Filter by status: `active`, `completed`, or `failed` |
+| Param    | Type      | Default | Notes                                                |
+| -------- | --------- | ------- | ---------------------------------------------------- |
+| `limit`  | `integer` | `20`    | Max results per page (1–100)                         |
+| `offset` | `integer` | `0`     | Pagination offset                                    |
+| `status` | `string`  | all     | Filter by status: `active`, `completed`, or `failed` |
 
 **Example:** `GET /api/sessions/history?limit=20&offset=0&status=completed`
 
 **Response (200):**
+
 ```json
 {
   "success": true,
@@ -596,7 +636,7 @@ class BuyTimeAPI {
     func updateBalance(availableMinutes: Int) async throws -> Balance { ... }
 
     // POST /api/sessions/start
-    func startSession(mode: String, plannedDurationMinutes: Int?) async throws -> FocusSession { ... }
+    func startSession(sessionId: UUID = UUID(), mode: String, plannedDurationMinutes: Int?) async throws -> FocusSession { ... }
 
     // POST /api/sessions/end
     func endSession(sessionId: String, actualDurationMinutes: Int) async throws -> SessionResult { ... }
@@ -638,65 +678,65 @@ func waitForUserCreation(maxRetries: Int = 5) async throws -> UserProfile {
 
 ### UserProfile
 
-| Field | Type | Notes |
-|-------|------|-------|
-| `id` | `String` (UUID) | Internal DB ID |
-| `email` | `String?` | From Clerk |
-| `displayName` | `String?` | From Clerk or user-set |
-| `subscriptionTier` | `String` | `"free"` or `"premium"` |
-| `subscriptionStatus` | `String` | `"none"`, `"active"`, `"expired"`, `"cancelled"` |
-| `subscriptionExpiresAt` | `String?` | ISO 8601 datetime or null |
-| `createdAt` | `String` | ISO 8601 datetime |
-| `balance.availableMinutes` | `Int` | Spendable reward minutes |
-| `balance.currentStreakDays` | `Int` | Consecutive days with sessions |
+| Field                       | Type            | Notes                                            |
+| --------------------------- | --------------- | ------------------------------------------------ |
+| `id`                        | `String` (UUID) | Internal DB ID                                   |
+| `email`                     | `String?`       | From Clerk                                       |
+| `displayName`               | `String?`       | From Clerk or user-set                           |
+| `subscriptionTier`          | `String`        | `"free"` or `"premium"`                          |
+| `subscriptionStatus`        | `String`        | `"none"`, `"active"`, `"expired"`, `"cancelled"` |
+| `subscriptionExpiresAt`     | `String?`       | ISO 8601 datetime or null                        |
+| `createdAt`                 | `String`        | ISO 8601 datetime                                |
+| `balance.availableMinutes`  | `Int`           | Spendable reward minutes                         |
+| `balance.currentStreakDays` | `Int`           | Consecutive days with sessions                   |
 
 ### UserPreferences
 
-| Field | Type | Notes |
-|-------|------|-------|
-| `focusDurationMinutes` | `Int` | Default focus duration (1-240) |
-| `focusMode` | `String` | Default mode: `fun`, `easy`, `medium`, `hard` |
-| `updatedAt` | `String` | ISO 8601 datetime |
+| Field                  | Type     | Notes                                         |
+| ---------------------- | -------- | --------------------------------------------- |
+| `focusDurationMinutes` | `Int`    | Default focus duration (1-240)                |
+| `focusMode`            | `String` | Default mode: `fun`, `easy`, `medium`, `hard` |
+| `updatedAt`            | `String` | ISO 8601 datetime                             |
 
 ### Balance
 
-| Field | Type | Notes |
-|-------|------|-------|
-| `availableMinutes` | `Int` | Spendable reward minutes |
-| `currentStreakDays` | `Int` | Consecutive days with completed sessions |
-| `lastSessionDate` | `String?` | ISO 8601 date or null |
-| `updatedAt` | `String` | ISO 8601 datetime |
-| `today.earnedMinutes` | `Int` | Reward minutes earned today (computed live) |
-| `today.spentMinutes` | `Int` | Reward minutes spent today (computed live) |
-| `today.sessionsCompleted` | `Int` | Completed focus sessions today |
-| `today.sessionsFailed` | `Int` | Failed focus sessions today |
+| Field                     | Type      | Notes                                       |
+| ------------------------- | --------- | ------------------------------------------- |
+| `availableMinutes`        | `Int`     | Spendable reward minutes                    |
+| `currentStreakDays`       | `Int`     | Consecutive days with completed sessions    |
+| `lastSessionDate`         | `String?` | ISO 8601 date or null                       |
+| `updatedAt`               | `String`  | ISO 8601 datetime                           |
+| `today.earnedMinutes`     | `Int`     | Reward minutes earned today (computed live) |
+| `today.spentMinutes`      | `Int`     | Reward minutes spent today (computed live)  |
+| `today.sessionsCompleted` | `Int`     | Completed focus sessions today              |
+| `today.sessionsFailed`    | `Int`     | Failed focus sessions today                 |
 
 > `today` fields are only present on `GET /api/balance`, not on the `PATCH` response.
 
 ### FocusSession
 
-| Field | Type | Notes |
-|-------|------|-------|
-| `id` | `String` (UUID) | Session identifier |
-| `mode` | `String` | `fun`, `easy`, `medium`, or `hard` |
-| `multiplierUsed` | `Int` | Reward multiplier snapshot at session start |
-| `status` | `String` | `active`, `completed`, or `failed` |
-| `plannedDurationMinutes` | `Int?` | Target duration, or null for open-ended |
-| `actualDurationMinutes` | `Int?` | Actual focus time (set on end/abandon) |
-| `rewardMinutes` | `Int?` | Reward earned (set on completion only) |
-| `startedAt` | `String` | ISO 8601 datetime |
-| `endedAt` | `String?` | ISO 8601 datetime, or null if still active |
-| `createdAt` | `String` | ISO 8601 datetime |
+| Field                    | Type            | Notes                                       |
+| ------------------------ | --------------- | ------------------------------------------- |
+| `id`                     | `String` (UUID) | Session identifier                          |
+| `mode`                   | `String`        | `fun`, `easy`, `medium`, or `hard`          |
+| `multiplierUsed`         | `Int`           | Reward multiplier snapshot at session start |
+| `status`                 | `String`        | `active`, `completed`, or `failed`          |
+| `plannedDurationMinutes` | `Int?`          | Target duration, or null for open-ended     |
+| `actualDurationMinutes`  | `Int?`          | Actual focus time (set on end/abandon)      |
+| `rewardMinutes`          | `Int?`          | Reward earned (set on completion only)      |
+| `startedAt`              | `String`        | ISO 8601 datetime                           |
+| `endedAt`                | `String?`       | ISO 8601 datetime, or null if still active  |
+| `createdAt`              | `String`        | ISO 8601 datetime                           |
 
 ### Focus Modes
 
-| Mode | Multiplier | Reward per 60 min focus |
-|------|-----------|------------------------|
-| `fun` | 100% | 60 min |
-| `easy` | 75% | 45 min |
-| `medium` | 50% | 30 min |
-| `hard` | 25% | 15 min |
+| Mode     | Multiplier | Reward per 60 min focus |
+| -------- | ---------- | ----------------------- |
+| `fun`    | 100%       | 60 min                  |
+| `easy`   | 75%        | 45 min                  |
+| `medium` | 50%        | 30 min                  |
+| `hard`   | 25%        | 15 min                  |
 
 ---
 
-*Last updated: February 21, 2026 — Phase 1, 2 + Preferences + Balance + Sessions*
+_Last updated: March 5, 2026 — Phase 1, 2 + Preferences + Balance + Sessions (idempotent)_

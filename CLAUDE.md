@@ -41,6 +41,19 @@ Main App (UI) ←→ SharedData.swift (UserDefaults + AppGroup) ←→ Extension
 3. `AppBlockUtils.startEarnedTimeMonitoring(minutes:)` removes shields and starts DeviceActivityEvent
 4. After threshold reached → `DeviceActivityMonitorExtension.eventDidReachThreshold()` reapplies shields
 
+### ViewModels
+
+Each ViewModel owns a single domain. Views compose them as needed.
+
+| ViewModel | Domain | Used By |
+|-----------|--------|---------|
+| `BalanceViewModel` | Wallet balance sync (delta-based API sync) | HomeView, potentially other views |
+| `PreferencesViewModel` | Focus duration/mode preferences (24h cached) | HomeView, RewardModification, FocusSessionSheet |
+| `FocusViewModel` | Focus session lifecycle (start/abandon/pending/timer/sync queue) | HomeView |
+| `ParentViewModel` | Parent view logic (onboarding, tab state) | ParentView |
+
+`FocusViewModel` takes `BalanceViewModel` and `PreferencesViewModel` as `init` dependencies — it doesn't own them. HomeView creates all three as `@StateObject` and wires them together in its `init()`.
+
 ### Key Utilities
 
 - **SharedData.swift** (`BuyTime/Utilities/`) - AppGroup UserDefaults wrapper, shared across all targets
