@@ -25,6 +25,9 @@ struct HomeView: View {
     // Focus abandon UI
     @State private var isShowingEndFocusAlert = false
 
+    // Help
+    @State private var isShowingHelp = false
+
     private let focusPresets: [(label: String, minutes: Int)] = [
         ("15m", 15),
         ("30m", 30),
@@ -41,23 +44,35 @@ struct HomeView: View {
     }
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: 32) {
-                BuyTimeCard(timeBalance: balanceVM.availableMinutes).padding(.top, 32)
+        NavigationStack {
+            ScrollView {
+                VStack(spacing: 24) {
+                    BuyTimeCard(timeBalance: balanceVM.availableMinutes)
 
-                todayStatsSection
+                    todayStatsSection
 
-                if focusVM.isFocusActive {
-                    activeFocusSection
-                } else {
-                    // startFocusSection
-                    activeFocusSection
+                    if focusVM.isFocusActive {
+                        activeFocusSection
+                    } else {
+                        startFocusSection
+                    }
+                }
+                .padding(.horizontal, 20)
+            }
+            .refreshable {
+                await balanceVM.refresh()
+            }
+            // .navigationTitle("ByTime")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbarTitleDisplayMode(.inlineLarge)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button { isShowingHelp = true } label: {
+                        Image(systemName: "questionmark.circle")
+                    }
                 }
             }
-            .padding(.horizontal, 20)
-        }
-        .refreshable {
-            await balanceVM.refresh()
+            .contentMargins(.top, 0, for: .scrollContent)
         }
         .onAppear {
             balanceVM.onAppear()
@@ -103,6 +118,10 @@ struct HomeView: View {
                 onCancel: { isShowingFocusSheet = false }
             )
             .presentationDetents([.height(350)])
+        }
+        .sheet(isPresented: $isShowingHelp) {
+            HelpSheet()
+                .presentationDetents([.medium])
         }
         .alert("End Focus Early?", isPresented: $isShowingEndFocusAlert) {
             Button("End Focus", role: .destructive) {

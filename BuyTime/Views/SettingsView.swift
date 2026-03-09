@@ -102,7 +102,7 @@ HStack {
         selectedMinutes: $spendAmount,
         title: "Set Spend Time",
         buttonLabel: "Set Time",
-        range: Array(stride(from: 1, to: 60, by: 5)),
+        range: Array(stride(from: 5, to: 60, by: 5)),
         onConfirm: {
           showTimePickerSheet = false
         }

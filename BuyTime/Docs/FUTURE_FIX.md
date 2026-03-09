@@ -50,3 +50,16 @@
   - `BalanceViewModel.swift`: remove `debugSetMinutes()` or gate it behind `#if DEBUG`
 
 - [ ] **Reset Clerk JWT token lifetime** — Token lifetime was increased for development/API testing. Before going to production, go to **Clerk Dashboard → Sessions** and reset the JWT token lifetime back to the default (**60 seconds**). A long-lived JWT is a security risk — if leaked, it can be used until it expires.
+
+---
+
+## Memory Investigation (iOS 26 Beta)
+
+- [ ] **"Terminated due to memory issue" on device** — App gets killed after ~6 minutes on iPhone 17,1 running iOS 26.2.1 (23C71). Full code review found no retain cycles, unbounded collections, or runaway allocations in app code. Likely causes:
+  - **FamilyControls / ManagedSettings / DeviceActivity frameworks** — These maintain background IPC connections to system daemons. Known to be memory-heavy; beta OS may exacerbate this.
+  - **Clerk SDK** — `Clerk.shared` singleton maintains auth state, network sessions, and token caching. Check for known memory issues on iOS 26.
+  - **iOS 26 beta OS bug** — Memory management regressions are common in beta builds.
+  - **Action items:**
+    - Profile with Instruments (Leaks + Allocations) to identify the growing allocation.
+    - Test on iOS 18 stable to confirm whether the issue is OS-version-specific.
+    - Test with `applyRestrictions` and `AuthorizationCenter` subscription commented out to isolate FamilyControls as the cause.

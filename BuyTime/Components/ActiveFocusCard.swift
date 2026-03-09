@@ -28,7 +28,7 @@ struct ActiveFocusCard: View {
 
                     // Blob 1 - soft blue, drifts left half
                     Circle()
-                        .fill(Color.blue.opacity(0.3))
+                        .fill(Color.blue.opacity(0.45))
                         .frame(width: w * 0.7, height: w * 0.7)
                         .blur(radius: 40)
                         .position(
@@ -38,7 +38,7 @@ struct ActiveFocusCard: View {
 
                     // Blob 2 - sky blue, drifts right half
                     Circle()
-                        .fill(Color.cyan.opacity(0.25))
+                        .fill(Color.cyan.opacity(0.4))
                         .frame(width: w * 0.65, height: w * 0.65)
                         .blur(radius: 45)
                         .position(
@@ -48,7 +48,7 @@ struct ActiveFocusCard: View {
 
                     // Blob 3 - periwinkle, drifts center-left
                     Circle()
-                        .fill(Color.indigo.opacity(0.2))
+                        .fill(Color.indigo.opacity(0.35))
                         .frame(width: w * 0.6, height: w * 0.6)
                         .blur(radius: 50)
                         .position(
@@ -58,7 +58,7 @@ struct ActiveFocusCard: View {
 
                     // Blob 4 - light teal, drifts center-right
                     Circle()
-                        .fill(Color.teal.opacity(0.25))
+                        .fill(Color.teal.opacity(0.4))
                         .frame(width: w * 0.6, height: w * 0.6)
                         .blur(radius: 35)
                         .position(
@@ -68,7 +68,7 @@ struct ActiveFocusCard: View {
 
                     // Blob 5 - right-side anchor
                     Circle()
-                        .fill(Color.blue.opacity(0.25))
+                        .fill(Color.blue.opacity(0.4))
                         .frame(width: w * 0.7, height: w * 0.7)
                         .blur(radius: 45)
                         .position(
@@ -76,6 +76,7 @@ struct ActiveFocusCard: View {
                             y: animateBlobs ? h * 0.4 : h * 0.6
                         )
                 }
+                .drawingGroup()
 
                 // Content overlay
                 VStack {
