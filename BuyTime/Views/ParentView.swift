@@ -13,6 +13,7 @@ struct ParentView: View {
     @StateObject var authManager = AuthorizationManager()
     @State var selection = FamilyActivitySelection()
     @AppStorage("hasCompletedAppSelection") var hasCompletedAppSelection = false
+    @State private var selectedTab: Int = 0
 
     var hasSelection: Bool {
             !selection.applicationTokens.isEmpty ||
@@ -73,17 +74,16 @@ struct ParentView: View {
                                 }
             }
             else {
-                TabView {
-                    Tab("Home", systemImage: "brain.filled.head.profile") {
+                TabView(selection: $selectedTab) {
+                    Tab("Home", systemImage: "brain.filled.head.profile", value: 0) {
                         HomeView()
                     }
 
-                    Tab("Time", systemImage: "hourglass") {
+                    Tab("Time", systemImage: "hourglass", value: 1) {
                         TimeView()
                     }
 
-
-                    Tab("Settings", systemImage: "gear") {
+                    Tab("Settings", systemImage: "gear", value: 2) {
                         SettingsView()
                     }
                 }

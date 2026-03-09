@@ -6,9 +6,11 @@
 //
 
 import SwiftUI
+import Combine
 
 struct HomeView: View {
-    @State var path = NavigationPath()
+    // @Binding var selectedTab: Int
+
     @StateObject private var balanceVM = BalanceViewModel()
     @StateObject private var prefsVM = PreferencesViewModel()
     @StateObject private var focusVM: FocusViewModel
@@ -30,6 +32,7 @@ struct HomeView: View {
     ]
 
     init() {
+        // _selectedTab = selectedTab
         let balance = BalanceViewModel()
         let prefs = PreferencesViewModel()
         _balanceVM = StateObject(wrappedValue: balance)
@@ -39,24 +42,16 @@ struct HomeView: View {
 
     var body: some View {
         ScrollView {
-            VStack(spacing: 24) {
+            VStack(spacing: 32) {
                 BuyTimeCard(timeBalance: balanceVM.availableMinutes).padding(.top, 32)
+
+                todayStatsSection
 
                 if focusVM.isFocusActive {
                     activeFocusSection
                 } else {
-                    startFocusSection
-                }
-
-                // Debug buttons
-                VStack(spacing: 12) {
-                    Button("Add 5 minutes") {
-                        balanceVM.addMinutes(5)
-                    }.buttonStyle(PrimaryButtonStyle())
-
-                    Button("Set Time to 0") {
-                        balanceVM.debugSetMinutes(0)
-                    }.buttonStyle(PrimaryButtonStyle())
+                    // startFocusSection
+                    activeFocusSection
                 }
             }
             .padding(.horizontal, 20)
@@ -124,72 +119,113 @@ struct HomeView: View {
         }
     }
 
+    // MARK: - Today Stats
+
+    @ViewBuilder
+    private var todayStatsSection: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            Text("Today")
+                .font(.caption)
+                .textCase(.uppercase)
+                .foregroundStyle(.secondary)
+                .tracking(1)
+                .padding(.horizontal, 16)
+                .padding(.top, 16)
+                .padding(.bottom, 16)
+
+            HStack(spacing: 0) {
+                statColumn(value: "\(balanceVM.todayEarnedMinutes)m", label: "Earned")
+                statColumn(value: "\(balanceVM.todaySpentMinutes)m", label: "Spent")
+                statColumn(value: "\(balanceVM.todaySessionsCompleted)", label: "Sessions")
+            }
+            .padding(.bottom, 20)
+
+            Divider().padding(.horizontal, 16)
+
+            Button {
+                // selectedTab = 1
+            } label: {
+                Text("History and Activity")
+                    .font(.subheadline)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 14)
+            }
+        }
+        .background(Color(.secondarySystemBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 14))
+    }
+
+    private func statColumn(value: String, label: String) -> some View {
+        VStack(spacing: 6) {
+            Text(value)
+                .font(.system(size: 28, weight: .bold, design: .rounded))
+            Text(label)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+        .frame(maxWidth: .infinity)
+    }
+
     // MARK: - Start Focus Section
 
     @ViewBuilder
     private var startFocusSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            GroupBox {
-                HStack(spacing: 10) {
-                    ForEach(focusPresets, id: \.minutes) { preset in
-                        Button(preset.label) {
-                            customMinutes = preset.minutes
-                            isShowingFocusSheet = true
-                        }
-                    }
+        VStack(alignment: .leading, spacing: 14) {
+            Text("Focus Session")
+                .font(.headline)
 
-                    Button {
-                        isShowingCustomPicker = true
-                    } label: {
-                        Image(systemName: "slider.horizontal.3")
+            VStack(spacing: 12) {
+                HStack(spacing: 12) {
+                    focusButton(label: focusPresets[0].label) {
+                        customMinutes = focusPresets[0].minutes
+                        isShowingFocusSheet = true
+                    }
+                    focusButton(label: focusPresets[1].label) {
+                        customMinutes = focusPresets[1].minutes
+                        isShowingFocusSheet = true
                     }
                 }
-            } label: {
-                Text("Start Focus Session")
-                    .font(.headline)
+                HStack(spacing: 12) {
+                    focusButton(label: focusPresets[2].label) {
+                        customMinutes = focusPresets[2].minutes
+                        isShowingFocusSheet = true
+                    }
+                    focusButton(label: "Custom") {
+                        isShowingCustomPicker = true
+                    }
+                }
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private func focusButton(label: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Text(label)
+                .font(.system(size: 24, weight: .bold, design: .rounded))
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 24)
+                .background(Color(.secondarySystemBackground))
+                .clipShape(RoundedRectangle(cornerRadius: 12))
+        }
+        .buttonStyle(.plain)
     }
 
     // MARK: - Active Focus Section
 
     @ViewBuilder
     private var activeFocusSection: some View {
-        VStack(spacing: 16) {
-            VStack(spacing: 10) {
-                HStack {
-                    Text("Focus Session Active")
-                        .font(.headline)
-                    Spacer()
-                }
+        let mode = Mode(rawValue: SharedData.focusMode) ?? .easy
+        let plannedMinutes = SharedData.focusPlannedMinutes
+        let estimatedReward = Int(Double(plannedMinutes) * mode.multiplier)
 
-                Text(focusVM.formatCountdown(focusVM.focusTimeRemaining))
-                    .font(.system(size: 52, weight: .light, design: .monospaced))
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 8)
-
-                let mode = Mode(rawValue: SharedData.focusMode) ?? .easy
-                let plannedMinutes = SharedData.focusPlannedMinutes
-                let estimatedReward = Int(Double(plannedMinutes) * mode.multiplier)
-
-                HStack(spacing: 6) {
-                    Text("Mode: \(mode.rawValue)")
-                    Text("•")
-                    Text("Reward: ~\(estimatedReward) min")
-                }
-                .font(.caption)
-                .foregroundStyle(.secondary)
-            }
-            .padding(20)
-            .background(Color(.systemIndigo).opacity(0.1))
-            .clipShape(RoundedRectangle(cornerRadius: 16))
-
-            Button("End Focus Early") {
-                isShowingEndFocusAlert = true
-            }
-            .foregroundStyle(.red)
-        }
+        ActiveFocusCard(
+            countdown: focusVM.formatCountdown(focusVM.focusTimeRemaining),
+            mode: mode,
+            estimatedReward: estimatedReward,
+            onEndEarly: { isShowingEndFocusAlert = true }
+        )
     }
 }
 

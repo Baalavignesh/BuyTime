@@ -164,7 +164,7 @@ class FocusViewModel: ObservableObject {
     // MARK: - Offline Sync Queue
 
     func drainSyncQueue() async {
-        var queue = SharedData.pendingSyncOperations
+        let queue = SharedData.pendingSyncOperations
         guard !queue.isEmpty else { return }
 
         let staleThreshold = Date().addingTimeInterval(-24 * 60 * 60)

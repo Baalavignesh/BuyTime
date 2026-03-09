@@ -477,21 +477,25 @@ Custom wheel picker → "Continue" → FocusSessionSheet confirmation → swipe 
 
 Mode is **not shown as a selector** — it is loaded from `PreferencesViewModel` (cached from `GET /api/preferences`). Displayed read-only in the confirmation sheet.
 
-**State B — Focus active:**
+**State B — Focus active (`ActiveFocusCard` component):**
 
 ```
 ┌─────────────────────────────────────┐
-│  Focus Session Active               │
-│                                     │
-│         ┌─────────────┐             │
-│         │   23:41     │  countdown  │
+│  FOCUS SESSION              EASY    │
+│         ┌─────────────┐             │  ← animated fluid blob background
+│         │   23:41     │  countdown  │  ← glass/material pill
 │         └─────────────┘             │
-│                                     │
-│  Mode: easy  •  Reward: ~18 min     │
-│                                     │
-│  [ End Focus Early ]  ← destructive │
+│  ~18 min reward                     │
 └─────────────────────────────────────┘
+│  ┌─────────────────────────────────┐│
+│  │  ✕  End Focus                   ││  ← full-width red button
+│  └─────────────────────────────────┘│
 ```
+
+`ActiveFocusCard` (`Components/ActiveFocusCard.swift`) is a self-contained component with:
+- Animated blurred blob background (5 circles with blue/cyan/indigo/teal, 6s ease-in-out loop)
+- Countdown pill uses `.glassEffect` on iOS 26+, `.ultraThinMaterial` fallback
+- Props: `countdown`, `mode`, `estimatedReward`, `onEndEarly` callback
 
 **Implementation notes:**
 - Countdown uses `focusVM.tick()` called by a 1-second `Timer` via `.onReceive`
@@ -653,3 +657,4 @@ the focus session duration — completely unrelated to remainingEarnedTimeMinute
 *Status: Implemented — February 26, 2026*
 *Feature: Focus Sessions v1*
 *Architecture Update: March 2026 — Extracted FocusViewModel, added FocusSessionSheet with swipe-to-start*
+*UI Update: March 2026 — Extracted ActiveFocusCard component with animated fluid blob background and iOS 26 liquid glass support*

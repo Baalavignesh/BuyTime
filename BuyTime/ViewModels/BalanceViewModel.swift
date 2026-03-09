@@ -25,6 +25,11 @@ class BalanceViewModel: ObservableObject {
     @Published private(set) var availableMinutes: Int = 0
     @Published var isRefreshing: Bool = false
 
+    // Today's stats (populated from GET /api/balance → today)
+    @Published private(set) var todayEarnedMinutes: Int = 0
+    @Published private(set) var todaySpentMinutes: Int = 0
+    @Published private(set) var todaySessionsCompleted: Int = 0
+
     // MARK: - Persistence
 
     private enum CacheKey {
@@ -135,6 +140,13 @@ class BalanceViewModel: ObservableObject {
 
         do {
             let apiBalance = try await BuyTimeAPI.shared.getBalance()
+
+            // Update today's stats
+            if let today = apiBalance.today {
+                todayEarnedMinutes = today.earnedMinutes
+                todaySpentMinutes = today.spentMinutes
+                todaySessionsCompleted = today.sessionsCompleted
+            }
 
             let delta = pendingDelta
 
