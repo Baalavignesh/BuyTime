@@ -93,3 +93,26 @@ When making **significant changes** to the codebase — such as modifying core l
 - UI-only tweaks (colors, layout, styling)
 - Bug fixes that don't change behavior
 - Refactors that don't change the public interface
+
+## Design Context
+
+### Users
+Adults self-managing their screen time. They open the app with intentionality — either to start a focus session or check their balance. They want the experience to feel like a tool they respect, not a chore. The "wallet" metaphor reinforces ownership and discipline.
+
+### Brand Personality
+**Premium, minimal, calm.** BuyTime should feel like a luxury fintech card — confident and understated. No cheerleading, no gamification noise. The interface earns trust through restraint and craft.
+
+### Aesthetic Direction
+- **Primary references**: Apple Wallet (metallic card aesthetic, status-driven), Nothing Phone / Teenage Engineering (dot-matrix patterns, industrial minimalism, distinctive identity)
+- **Anti-references**: Generic corporate SaaS, childish/cartoonish UI, cluttered dashboards, flat/boring screens
+- **Theme**: Dark-first with glassmorphism. Premium surfaces with subtle depth — glows, blur, fine borders. Pixel/grid patterns as a signature texture (inspired by Nothing/TE aesthetic).
+- **Color**: Primarily monochrome (black, white, grays) with system blue as the sole accent. Opacity layering over solid colors. No bright palettes.
+- **Typography**: System SF with rounded variants for numbers, monospaced for balances. Generous letter-tracking on labels. Hierarchy through weight and size, not color.
+- **Motion**: Fluid and organic (6s blob loops, spring animations), never jarring. Haptics reinforce key moments.
+
+### Design Principles
+1. **Restraint is luxury** — Every element must earn its place. White space is a feature, not a gap.
+2. **Tactile and physical** — The card metaphor should feel real: metallic gradients, embossed textures, chip/NFC details. UI should feel like holding something.
+3. **Distinctive, not decorative** — Pixel grids, dot patterns, and industrial details give BuyTime a recognizable identity without being ornamental.
+4. **Calm confidence** — No anxiety-inducing countdowns or aggressive alerts. The UI should feel like a quiet, capable tool.
+5. **Dark craft** — Dark mode is the canvas. Depth comes from subtle glows, blur layers, and fine 0.5pt borders — never from drop shadows or loud gradients.

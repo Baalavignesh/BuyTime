@@ -34,7 +34,6 @@ struct BuyTimeCard: View {
 
             // Card
             cardContent
-                .padding(.horizontal, 20)
                 .frame(width: 300, height: 180)
                 .cardBackground(tier: tier)
                 .clipShape(RoundedRectangle(cornerRadius: 16))
@@ -59,46 +58,105 @@ struct BuyTimeCard: View {
     }
 
     private var cardContent: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            // App Name - Top Center
-            Text("ByTime")
-                .font(.system(size: 18, weight: .light, design: .rounded))
-                .frame(maxWidth: .infinity)
-                .padding(.top, 20)
+        ZStack(alignment: .leading) {
+            // Left-side pixel grid pattern
+            pixelPattern
+                .frame(width: 160)
+                .clipped()
+                .mask(
+                    LinearGradient(
+                        colors: [
+                            Color.white.opacity(0.6),
+                            Color.white.opacity(0.15),
+                            Color.clear
+                        ],
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    )
+                )
 
-            Spacer()
+            VStack(alignment: .leading, spacing: 0) {
+                // Top Row: Logo + ByTime
+                HStack(spacing: 4) {
+                    Image("dark_logo")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 28, height: 28)
 
-            // Logo - Center
-            Image("dark_logo")
-                .resizable()
-                .scaledToFit()
-                .frame(width: 48, height: 48)
-                .frame(maxWidth: .infinity)
-
-            Spacer()
-
-            // Time Balance
-            HStack(spacing: 5) {
-                Image(systemName: "timer")
-                    .font(.system(size: 10))
-                Text("\(timeBalance) min")
-                    .font(.system(size: 13, weight: .semibold, design: .monospaced))
-            }
-            .padding(.bottom, 8)
-
-            // Bottom Row: Name & Tier
-            HStack {
-                Text(userName)
-                    .font(.system(size: 10, weight: .medium))
-                    .tracking(1.5)
+                    Text("ByTime")
+                        .font(.system(size: 16, weight: .light, design: .rounded))
+                }
+                .padding(.top, 16)
 
                 Spacer()
 
-                Text(tier.rawValue.uppercased())
-                    .font(.system(size: 8, weight: .bold))
-                    .tracking(2)
+                // Middle Row
+                HStack {
+                    Spacer()
+
+                    Image(systemName: "wifi")
+                        .font(.system(size: 20, weight: .thin))
+                        .foregroundStyle(.white.opacity(0.65))
+                        .rotationEffect(.degrees(90))
+                }
+
+                Spacer()
+
+                // Time Balance
+                HStack(spacing: 5) {
+                    Image(systemName: "timer")
+                        .font(.system(size: 10))
+                    Text("\(timeBalance) min")
+                        .font(.system(size: 13, weight: .semibold, design: .monospaced))
+                }
+                .padding(.bottom, 6)
+
+                // Bottom Row: Name & Tier
+                HStack {
+                    Text(userName)
+                        .font(.system(size: 10, weight: .medium))
+                        .tracking(1.5)
+
+                    Spacer()
+
+                    Text(tier.rawValue.uppercased())
+                        .font(.system(size: 8, weight: .bold))
+                        .tracking(2)
+                }
+                .padding(.bottom, 14)
             }
-            .padding(.bottom, 14)
+            .padding(.horizontal, 20)
+        }
+    }
+
+    private var pixelPattern: some View {
+        Canvas { context, size in
+            let cellSize: CGFloat = 6
+            let gap: CGFloat = 2
+            let step = cellSize + gap
+            let cols = Int(size.width / step) + 1
+            let rows = Int(size.height / step) + 1
+
+            for row in 0..<rows {
+                for col in 0..<cols {
+                    // Deterministic pseudo-random using simple hash
+                    let hash = (row * 31 + col * 17 + row * col * 7) % 100
+                    let opacity = hash < 30 ? 0.12 : (hash < 45 ? 0.06 : 0.0)
+
+                    if opacity > 0 {
+                        let rect = CGRect(
+                            x: CGFloat(col) * step,
+                            y: CGFloat(row) * step,
+                            width: cellSize,
+                            height: cellSize
+                        )
+                        context.fill(
+                            Path(roundedRect: rect, cornerRadius: 1),
+                            with: .color(.white.opacity(opacity))
+                        )
+                    }
+                }
+            }
         }
     }
 }
@@ -111,7 +169,7 @@ private struct CardBackgroundModifier: ViewModifier {
     func body(content: Content) -> some View {
         if #available(iOS 26, *) {
             content
-                .background(.ultraThinMaterial)
+                .background(Color(white: 0.06))
                 .glassEffect(.regular.interactive(), in: .rect(cornerRadius: 16))
         } else {
             content

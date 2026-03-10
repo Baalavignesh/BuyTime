@@ -143,47 +143,69 @@ struct HomeView: View {
     @ViewBuilder
     private var todayStatsSection: some View {
         VStack(alignment: .leading, spacing: 0) {
-            Text("Today")
-                .font(.caption)
-                .textCase(.uppercase)
-                .foregroundStyle(.secondary)
-                .tracking(1)
-                .padding(.horizontal, 16)
-                .padding(.top, 16)
-                .padding(.bottom, 16)
+            // Total Balance label + large time
+            VStack(alignment: .leading, spacing: 6) {
+                Text("Total Balance")
+                    .font(.subheadline)
+                    .foregroundStyle(.white.opacity(0.5))
 
-            HStack(spacing: 0) {
-                statColumn(value: "\(balanceVM.todayEarnedMinutes)m", label: "Earned")
-                statColumn(value: "\(balanceVM.todaySpentMinutes)m", label: "Spent")
-                statColumn(value: "\(balanceVM.todaySessionsCompleted)", label: "Sessions")
+                Text("\(balanceVM.availableMinutes) min")
+                    .font(.system(size: 24, weight: .bold, design: .rounded))
+                    .foregroundStyle(.white)
             }
-            .padding(.bottom, 20)
+            .padding(.horizontal, 16)
+            .padding(.top, 16)
+            .padding(.bottom, 14)
+
+            Divider().padding(.horizontal, 16)
+
+            // Detail rows
+            VStack(spacing: 0) {
+                detailRow(label: "Time Spent", value: "\(balanceVM.todaySpentMinutes)", "min")
+                detailRow(label: "Today's Sessions", icon: "checkmark", value: "\(balanceVM.todaySessionsCompleted)", "")
+            }
+            .padding(.vertical, 10)
 
             Divider().padding(.horizontal, 16)
 
             Button {
                 // selectedTab = 1
             } label: {
-                Text("History and Activity")
+                Text("Statement and Activity")
                     .font(.subheadline)
                     .frame(maxWidth: .infinity, alignment: .leading)
+                    .foregroundStyle(.white)
                     .padding(.horizontal, 16)
                     .padding(.vertical, 14)
             }
+            .buttonStyle(.plain)
         }
-        .background(Color(.secondarySystemBackground))
+        .background(Color(white: 0.06))
         .clipShape(RoundedRectangle(cornerRadius: 14))
     }
 
-    private func statColumn(value: String, label: String) -> some View {
-        VStack(spacing: 6) {
-            Text(value)
-                .font(.system(size: 28, weight: .bold, design: .rounded))
+    private func detailRow(label: String, icon: String? = nil, value: String, _ suffix: String) -> some View {
+        HStack {
             Text(label)
-                .font(.caption)
-                .foregroundStyle(.secondary)
+                .font(.subheadline)
+                .foregroundStyle(.white.opacity(0.5))
+            Spacer()
+            HStack(spacing: 2) {
+                if let icon {
+                    Image(systemName: icon)
+                        .font(.system(size: 12))
+                        .foregroundStyle(.white.opacity(0.8))
+                }
+                Text(value)
+                    .font(.subheadline)
+                    .foregroundStyle(.white.opacity(0.8))
+                Text(suffix)
+                    .font(.subheadline)
+                    .foregroundStyle(.white.opacity(0.8))
+            }
         }
-        .frame(maxWidth: .infinity)
+        .padding(.horizontal, 16)
+        .padding(.vertical, 6)
     }
 
     // MARK: - Start Focus Section
