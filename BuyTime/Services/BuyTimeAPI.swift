@@ -266,6 +266,7 @@ class BuyTimeAPI {
 
     private struct AbandonSessionBody: Encodable {
         let sessionId: String
+        let penaltyMinutes: Int?
     }
 
     // MARK: - Session Endpoints
@@ -283,8 +284,8 @@ class BuyTimeAPI {
     }
 
     /// POST /api/sessions/abandon
-    func abandonSession(sessionId: String) async throws -> FocusSession {
-        let body = try JSONEncoder().encode(AbandonSessionBody(sessionId: sessionId))
+    func abandonSession(sessionId: String, penaltyMinutes: Int = 0) async throws -> FocusSession {
+        let body = try JSONEncoder().encode(AbandonSessionBody(sessionId: sessionId, penaltyMinutes: penaltyMinutes > 0 ? penaltyMinutes : nil))
         return try await makeRequest(endpoint: "/api/sessions/abandon", method: "POST", body: body)
     }
 

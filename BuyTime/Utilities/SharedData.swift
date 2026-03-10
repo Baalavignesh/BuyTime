@@ -20,6 +20,7 @@ struct SyncOperation: Codable {
     let mode: String
     let plannedMinutes: Int
     let actualMinutes: Int
+    let penaltyMinutes: Int
     let createdAt: Date
 }
 

@@ -81,6 +81,7 @@ struct ClerkQuickstartApp: App {
                             mode: modeStr,
                             plannedMinutes: plannedMinutes,
                             actualMinutes: actualMinutes,
+                            penaltyMinutes: 0,
                             createdAt: Date()
                         ))
                     }

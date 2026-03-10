@@ -26,6 +26,14 @@
 
 ---
 
+## Sessions
+
+- [ ] **Adaptive focus duration presets** — The 3 quick-pick buttons (currently hardcoded to 15m, 30m, 1hr) should adapt to the user's habits. Track how often each duration is selected (locally or via session history API). Replace the least-used preset with the user's most-picked non-default duration. The 4th button is always "Custom". Example: if a user frequently picks 4hr but never picks 15m, the presets become 30m, 1hr, 4hr, Custom. Requires a simple frequency counter per duration — can be stored in UserDefaults. Consider a minimum sample size (e.g. 5+ sessions) before swapping presets to avoid premature changes.
+
+- [ ] **Backend auto-expiry for stale sessions** — If a session remains `active` longer than `plannedDurationMinutes + buffer` (e.g. +30 min), the backend should auto-mark it as `failed`. This handles edge cases where the client never sends `end` or `abandon` (app uninstalled, sync queue aged out, etc.). Currently the frontend handles stale sessions by abandoning them on the next `startSession` 409 conflict, but backend auto-expiry would prevent orphaned rows from accumulating indefinitely.
+
+---
+
 ## Balance Sync
 
 - [ ] **Sign-out cache invalidation** — On sign-out, clear `balance_lastAPIValue` from `UserDefaults.standard`. Otherwise the delta model will compute an incorrect `pendingDelta` for the next user session or after re-login. Mirror the same pattern needed for `preferences_*` keys (see above).

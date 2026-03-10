@@ -121,7 +121,7 @@ struct HomeView: View {
         }
         .sheet(isPresented: $isShowingHelp) {
             HelpSheet()
-                .presentationDetents([.medium])
+                .presentationDetents([.large])
         }
         .alert("End Focus Early?", isPresented: $isShowingEndFocusAlert) {
             Button("End Focus", role: .destructive) {

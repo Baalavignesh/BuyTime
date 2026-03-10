@@ -58,7 +58,7 @@ class FocusViewModel: ObservableObject {
         AppBlockUtils().startFocusMonitoring(minutes: minutes, mode: mode)
         syncFocusState()
 
-        // Fire API in background
+        // Fire API in background — if a stale session is blocking, abandon it first and retry
         let sessionId = SharedData.focusSessionId
         Task {
             do {
@@ -67,13 +67,42 @@ class FocusViewModel: ObservableObject {
                     mode: mode,
                     plannedDurationMinutes: minutes
                 )
+                print("[FocusVM] startSession API success: \(sessionId)")
+            } catch APIError.badRequest(_) {
+                // Likely a stale active session blocking — abandon it and retry
+                print("[FocusVM] startSession blocked by stale session, attempting cleanup...")
+                do {
+                    if let stale = try await BuyTimeAPI.shared.getCurrentSession() {
+                        _ = try? await BuyTimeAPI.shared.abandonSession(sessionId: stale.id)
+                        print("[FocusVM] abandoned stale session: \(stale.id)")
+                    }
+                    _ = try await BuyTimeAPI.shared.startSession(
+                        sessionId: sessionId,
+                        mode: mode,
+                        plannedDurationMinutes: minutes
+                    )
+                    print("[FocusVM] startSession API success (after cleanup): \(sessionId)")
+                } catch {
+                    print("[FocusVM] startSession API failed after cleanup: \(error)")
+                    SharedData.enqueueSyncOperation(SyncOperation(
+                        kind: .start,
+                        sessionId: sessionId,
+                        mode: mode,
+                        plannedMinutes: minutes,
+                        actualMinutes: 0,
+                        penaltyMinutes: 0,
+                        createdAt: Date()
+                    ))
+                }
             } catch {
+                print("[FocusVM] startSession API failed: \(error)")
                 SharedData.enqueueSyncOperation(SyncOperation(
                     kind: .start,
                     sessionId: sessionId,
                     mode: mode,
                     plannedMinutes: minutes,
                     actualMinutes: 0,
+                    penaltyMinutes: 0,
                     createdAt: Date()
                 ))
             }
@@ -90,8 +119,9 @@ class FocusViewModel: ObservableObject {
         AppBlockUtils().stopFocusMonitoring()
 
         // Apply wallet balance penalty locally (halve if > 0)
-        if currentBalance > 0 {
-            let newBalance = currentBalance / 2
+        let penalty = currentBalance > 0 ? currentBalance / 2 : 0
+        if penalty > 0 {
+            let newBalance = currentBalance - penalty
             Task { await balanceVM.setBalance(newBalance) }
         }
 
@@ -104,14 +134,17 @@ class FocusViewModel: ObservableObject {
         guard !sessionId.isEmpty else { return }
         Task {
             do {
-                _ = try await BuyTimeAPI.shared.abandonSession(sessionId: sessionId)
+                _ = try await BuyTimeAPI.shared.abandonSession(sessionId: sessionId, penaltyMinutes: penalty)
+                print("[FocusVM] abandonSession API success: \(sessionId)")
             } catch {
+                print("[FocusVM] abandonSession API failed: \(error)")
                 SharedData.enqueueSyncOperation(SyncOperation(
                     kind: .abandon,
                     sessionId: sessionId,
                     mode: modeStr,
                     plannedMinutes: 0,
                     actualMinutes: 0,
+                    penaltyMinutes: penalty,
                     createdAt: Date()
                 ))
             }
@@ -155,6 +188,7 @@ class FocusViewModel: ObservableObject {
                     mode: modeStr,
                     plannedMinutes: plannedMinutes,
                     actualMinutes: actualMinutes,
+                    penaltyMinutes: 0,
                     createdAt: Date()
                 ))
             }
@@ -187,7 +221,7 @@ class FocusViewModel: ObservableObject {
                         actualDurationMinutes: op.actualMinutes
                     )
                 case .abandon:
-                    _ = try await BuyTimeAPI.shared.abandonSession(sessionId: op.sessionId)
+                    _ = try await BuyTimeAPI.shared.abandonSession(sessionId: op.sessionId, penaltyMinutes: op.penaltyMinutes)
                 }
             } catch {
                 remaining.append(op)
