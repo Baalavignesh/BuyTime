@@ -123,3 +123,13 @@ We have enqueueSyncOperation in SharedData.swift which is used to create an arra
 pendingSyncOperations has all the operations that needs to be performed.
 
 In the main view, we call drainSyncQueue() which will process all the pending operations, based on the case assigned to it.
+
+`enqueueSyncOperation` — Extensions can't use Clerk/BuyTimeAPI, so when they need to make an API call (e.g. end a focus session), they create a `SyncOperation` struct with the kind (start/end/abandon), sessionId, mode, minutes, and a timestamp, then append it to `pendingSyncOperations` in SharedData (AppGroup UserDefaults). This also handles offline scenarios — if the device has no network, API calls from the main app also get queued here. When the app comes back to foreground (or back online), `FocusViewModel.drainSyncQueue()` processes each queued operation by calling the actual API, syncs the data, pulls the latest from the database, and refreshes the UI. Operations older than 24 hours are dropped to avoid replaying stale data.
+
+---
+
+Balance Sync — Shield Spend Delta
+
+**Problem:** The old sync used an inferred delta (`SharedData.earnedTimeMinutes - lastAPIValue`). If the balance changed externally (Chrome extension, DB edit), the stale local value created a negative delta that overwrote the server back to the old value.
+
+**Fix:** `SharedData.shieldSpendDelta` — an explicit counter that only the ShieldActionExtension writes to (decrements on each spend). On foreground, `BalanceViewModel.performSync` GETs the server balance, applies `shieldSpendDelta` if non-zero (then resets it), otherwise accepts the server value as-is. No more inferred deltas — external changes flow through correctly.

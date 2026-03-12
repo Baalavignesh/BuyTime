@@ -51,6 +51,9 @@ class SharedData {
         case pendingSessionEnd = "pendingSessionEnd"
         case pendingActualMinutes = "pendingActualMinutes"
 
+        // Shield extension spend tracking
+        case shieldSpendDelta = "shieldSpendDelta"
+
         // Offline sync queue (main app only)
         case pendingSyncOperations = "pendingSyncOperations"
     }
@@ -162,6 +165,15 @@ class SharedData {
     static var focusPlannedMinutes: Int {
         get { defaultsGroup?.integer(forKey: Keys.focusPlannedMinutes.rawValue) ?? 0 }
         set { defaultsGroup?.set(max(0, newValue), forKey: Keys.focusPlannedMinutes.rawValue) }
+    }
+
+    // MARK: - Shield Spend Delta
+
+    /// Accumulated minutes spent by the shield extension while the app was backgrounded.
+    /// The main app reads and resets this on foreground to apply the delta to the server balance.
+    static var shieldSpendDelta: Int {
+        get { defaultsGroup?.integer(forKey: Keys.shieldSpendDelta.rawValue) ?? 0 }
+        set { defaultsGroup?.set(newValue, forKey: Keys.shieldSpendDelta.rawValue) }
     }
 
     // MARK: - Background-to-Foreground Handoff

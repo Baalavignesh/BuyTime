@@ -164,7 +164,7 @@ struct ActiveFocusCard: View {
                         RoundedRectangle(cornerRadius: 10)
                             .stroke(.red.opacity(0.25), lineWidth: 0.5)
                     )
-            }
+            }.padding(.bottom, 32)
         }
     }
 }

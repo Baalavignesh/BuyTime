@@ -8,6 +8,11 @@
 import SwiftUI
 import Combine
 
+struct FocusMinutes: Identifiable {
+    let id = UUID()
+    let value: Int
+}
+
 struct HomeView: View {
     // @Binding var selectedTab: Int
 
@@ -19,7 +24,7 @@ struct HomeView: View {
 
     // Focus start UI
     @State private var isShowingCustomPicker = false
-    @State private var isShowingFocusSheet = false
+    @State private var focusSheetMinutes: FocusMinutes? = nil
     @State private var customMinutes: Int = 30
 
     // Focus abandon UI
@@ -62,9 +67,9 @@ struct HomeView: View {
             .refreshable {
                 await balanceVM.refresh()
             }
-            // .navigationTitle("ByTime")
+            .navigationTitle("ByTime Platinum")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbarTitleDisplayMode(.inlineLarge)
+            .toolbarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button { isShowingHelp = true } label: {
@@ -101,21 +106,21 @@ struct HomeView: View {
                     isShowingCustomPicker = false
                     Task {
                         try? await Task.sleep(for: .milliseconds(50))
-                        isShowingFocusSheet = true
+                        focusSheetMinutes = FocusMinutes(value: customMinutes)
                     }
                 },
                 onCancel: { isShowingCustomPicker = false }
             )
             .presentationDetents([.height(300)])
         }
-        .sheet(isPresented: $isShowingFocusSheet) {
+        .sheet(item: $focusSheetMinutes) { item in
             FocusSessionSheet(
-                selectedMinutes: customMinutes,
+                selectedMinutes: item.value,
                 onConfirm: {
-                    isShowingFocusSheet = false
-                    focusVM.startFocusSession(minutes: customMinutes)
+                    focusSheetMinutes = nil
+                    focusVM.startFocusSession(minutes: item.value)
                 },
-                onCancel: { isShowingFocusSheet = false }
+                onCancel: { focusSheetMinutes = nil }
             )
             .presentationDetents([.height(350)])
         }
@@ -219,18 +224,15 @@ struct HomeView: View {
             VStack(spacing: 12) {
                 HStack(spacing: 12) {
                     focusButton(label: focusPresets[0].label) {
-                        customMinutes = focusPresets[0].minutes
-                        isShowingFocusSheet = true
+                        focusSheetMinutes = FocusMinutes(value: focusPresets[0].minutes)
                     }
                     focusButton(label: focusPresets[1].label) {
-                        customMinutes = focusPresets[1].minutes
-                        isShowingFocusSheet = true
+                        focusSheetMinutes = FocusMinutes(value: focusPresets[1].minutes)
                     }
                 }
                 HStack(spacing: 12) {
                     focusButton(label: focusPresets[2].label) {
-                        customMinutes = focusPresets[2].minutes
-                        isShowingFocusSheet = true
+                        focusSheetMinutes = FocusMinutes(value: focusPresets[2].minutes)
                     }
                     focusButton(label: "Custom") {
                         isShowingCustomPicker = true

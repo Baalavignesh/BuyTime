@@ -21,7 +21,7 @@ struct TimeView: View {
                     }.buttonStyle(PrimaryButtonStyle())
 
                     Button("Set Time to 0") {
-                        balanceVM.debugSetMinutes(0)
+                        Task { await balanceVM.setBalance(0) }
                     }.buttonStyle(PrimaryButtonStyle())
                 }
             }

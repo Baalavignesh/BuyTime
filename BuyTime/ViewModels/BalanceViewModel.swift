@@ -4,13 +4,11 @@
 //
 //  Manages the user's available minutes balance.
 //
-//  Source of truth: SharedData.earnedTimeMinutes (AppGroup UserDefaults)
-//  API is a remote mirror synced via delta — safe for multi-device use.
+//  Source of truth: server (API) for balance, SharedData for local display.
 //
 //  Sync model:
-//    pendingDelta = SharedData.earnedTimeMinutes - lastAPIValue
-//    On sync: GET api balance → PATCH (apiBalance + pendingDelta) if delta != 0
-//             else accept server value (picks up other-device changes)
+//    On foreground: GET api balance → apply shieldSpendDelta if any → accept server value
+//    Shield extension writes explicit shieldSpendDelta — no inferred deltas.
 //
 
 import Foundation
@@ -32,31 +30,13 @@ class BalanceViewModel: ObservableObject {
 
     // MARK: - Persistence
 
-    private enum CacheKey {
-        static let lastAPIValue = "balance_lastAPIValue"
+    /// Whether we've ever synced with the API.
+    private var hasSynced: Bool {
+        UserDefaults.standard.bool(forKey: "balance_hasSynced")
     }
 
-    /// Last `availableMinutes` value confirmed from the API.
-    /// -1 means "never synced" — first sync will GET only, no PATCH.
-    private var lastAPIValue: Int {
-        get {
-            let stored = UserDefaults.standard.integer(forKey: CacheKey.lastAPIValue)
-            // integer(forKey:) returns 0 when key is absent; use -1 as sentinel instead
-            guard UserDefaults.standard.object(forKey: CacheKey.lastAPIValue) != nil else {
-                return -1
-            }
-            return stored
-        }
-        set {
-            UserDefaults.standard.set(newValue, forKey: CacheKey.lastAPIValue)
-        }
-    }
-
-    /// Changes made locally that haven't been confirmed by the API yet.
-    /// Computed — no need to persist separately.
-    private var pendingDelta: Int {
-        guard lastAPIValue != -1 else { return 0 }
-        return SharedData.earnedTimeMinutes - lastAPIValue
+    private func markSynced() {
+        UserDefaults.standard.set(true, forKey: "balance_hasSynced")
     }
 
     // MARK: - Init
@@ -67,22 +47,16 @@ class BalanceViewModel: ObservableObject {
 
     // MARK: - Lifecycle Hooks
 
-    /// Call from `.onAppear`. Only fetches on first-ever launch (no API value seeded yet).
+    /// Call from `.onAppear`. Fetches on first-ever launch.
     func onAppear() {
-        guard lastAPIValue == -1 else { return }
+        guard !hasSynced else { return }
         Task { await performSync(showSpinner: false) }
     }
 
     /// Call when `scenePhase` changes to `.active`.
-    /// Picks up any balance changes made by the shield extension, then syncs if needed.
+    /// Always syncs to pick up changes from other devices and apply shield spend delta.
     func onForeground() {
-        // Re-read SharedData in case the shield extension changed it while we were backgrounded
         availableMinutes = SharedData.earnedTimeMinutes
-
-        // If never synced, skip — wait for onAppear to do the initial GET
-        guard lastAPIValue != -1 else { return }
-
-        guard pendingDelta != 0 else { return }
         Task { await performSync(showSpinner: false) }
     }
 
@@ -104,7 +78,6 @@ class BalanceViewModel: ObservableObject {
     }
 
     /// Set the balance to an exact absolute value and sync to server.
-    /// Use this for penalty or correction operations that need to bypass the delta mechanism.
     func setBalance(_ amount: Int) async {
         let newValue = max(0, amount)
         SharedData.earnedTimeMinutes = newValue
@@ -112,28 +85,16 @@ class BalanceViewModel: ObservableObject {
 
         do {
             let confirmed = try await BuyTimeAPI.shared.updateBalance(availableMinutes: newValue)
-            lastAPIValue = confirmed.availableMinutes
             SharedData.earnedTimeMinutes = confirmed.availableMinutes
             availableMinutes = confirmed.availableMinutes
         } catch {
-            // Optimistically set lastAPIValue so delta stays 0 and we don't double-PATCH
-            lastAPIValue = newValue
+            // Silent — will sync on next foreground
         }
-    }
-
-    // MARK: - Debug (remove before production)
-
-    func debugSetMinutes(_ amount: Int) {
-        SharedData.earnedTimeMinutes = max(0, amount)
-        availableMinutes = SharedData.earnedTimeMinutes
-        // Reset lastAPIValue so the next sync re-seeds from the API
-        lastAPIValue = -1
     }
 
     // MARK: - Core Sync
 
-    /// Performs a GET /api/balance, then conditionally PATCH if pendingDelta != 0.
-    /// All failures are swallowed silently — pendingDelta persists for the next retry.
+    /// Fetches server balance, applies any shield spend delta, then accepts the result.
     private func performSync(showSpinner: Bool) async {
         if showSpinner { isRefreshing = true }
         defer { if showSpinner { isRefreshing = false } }
@@ -148,25 +109,24 @@ class BalanceViewModel: ObservableObject {
                 todaySessionsCompleted = today.sessionsCompleted
             }
 
-            let delta = pendingDelta
+            // Check if the shield extension spent minutes while we were backgrounded
+            let shieldDelta = SharedData.shieldSpendDelta
 
-            if delta != 0 {
-                // Local changes exist — apply them on top of the current server value.
-                // This preserves deductions/additions from other devices (e.g. laptop).
-                let newAbsolute = max(0, apiBalance.availableMinutes + delta)
+            if shieldDelta != 0 {
+                // Apply shield spend to server balance, then reset
+                let newAbsolute = max(0, apiBalance.availableMinutes + shieldDelta)
                 let confirmed = try await BuyTimeAPI.shared.updateBalance(availableMinutes: newAbsolute)
-                lastAPIValue = confirmed.availableMinutes
+                SharedData.shieldSpendDelta = 0
                 SharedData.earnedTimeMinutes = confirmed.availableMinutes
             } else {
-                // No local changes — accept server value (picks up other-device changes).
-                lastAPIValue = apiBalance.availableMinutes
+                // No shield changes — accept server value (picks up other-device changes)
                 SharedData.earnedTimeMinutes = apiBalance.availableMinutes
             }
 
             availableMinutes = SharedData.earnedTimeMinutes
+            markSynced()
         } catch {
-            // Silent failure.
-            // pendingDelta remains non-zero → will retry on next foreground or pull-to-refresh.
+            // Silent failure — will retry on next foreground or pull-to-refresh.
         }
     }
 }

@@ -62,6 +62,7 @@ class ShieldActionExtension: ShieldActionDelegate {
         }
 
         SharedData.earnedTimeMinutes = currentBalance - spendAmount
+        SharedData.shieldSpendDelta -= spendAmount
 
         let blockUtils = AppBlockUtils()
         blockUtils.startEarnedTimeMonitoring(minutes: spendAmount)
