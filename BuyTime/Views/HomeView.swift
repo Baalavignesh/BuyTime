@@ -13,6 +13,7 @@ struct FocusMinutes: Identifiable {
     let value: Int
 }
 
+
 struct HomeView: View {
     // @Binding var selectedTab: Int
 
@@ -26,6 +27,9 @@ struct HomeView: View {
     @State private var isShowingCustomPicker = false
     @State private var focusSheetMinutes: FocusMinutes? = nil
     @State private var customMinutes: Int = 30
+
+    // Focus expanded state
+    @State private var isFocusExpanded = false
 
     // Focus abandon UI
     @State private var isShowingEndFocusAlert = false
@@ -48,6 +52,14 @@ struct HomeView: View {
         _focusVM = StateObject(wrappedValue: FocusViewModel(balanceVM: balance, prefsVM: prefs))
     }
 
+    // Shared computed values for focus card
+    private var focusMode: Mode {
+        Mode(rawValue: SharedData.focusMode) ?? .easy
+    }
+    private var focusEstimatedReward: Int {
+        Int(Double(SharedData.focusPlannedMinutes) * focusMode.multiplier)
+    }
+
     var body: some View {
         NavigationStack {
             ScrollView {
@@ -57,7 +69,15 @@ struct HomeView: View {
                     todayStatsSection
 
                     if focusVM.isFocusActive {
-                        activeFocusSection
+                        ActiveFocusCard(
+                            isExpanded: false,
+                            countdown: focusVM.formatCountdown(focusVM.focusTimeRemaining),
+                            mode: focusMode,
+                            estimatedReward: focusEstimatedReward
+                        )
+                        .onTapGesture {
+                            isFocusExpanded = true
+                        }
                     } else {
                         startFocusSection
                     }
@@ -78,6 +98,29 @@ struct HomeView: View {
                 }
             }
             .contentMargins(.top, 0, for: .scrollContent)
+            .toolbar(isFocusExpanded ? .hidden : .visible, for: .tabBar)
+            .navigationDestination(isPresented: $isFocusExpanded) {
+                ActiveFocusCard(
+                    isExpanded: true,
+                    countdown: focusVM.formatCountdown(focusVM.focusTimeRemaining),
+                    mode: focusMode,
+                    estimatedReward: focusEstimatedReward,
+                    onCollapse: {
+                        isFocusExpanded = false
+                    },
+                    onEndEarly: {
+                        isFocusExpanded = false
+                        Task {
+                            try? await Task.sleep(for: .milliseconds(400))
+                            isShowingEndFocusAlert = true
+                        }
+                    }
+                )
+                .ignoresSafeArea()
+                .navigationBarBackButtonHidden()
+                .toolbar(.hidden, for: .navigationBar)
+                .toolbar(.hidden, for: .tabBar)
+            }
         }
         .onAppear {
             balanceVM.onAppear()
@@ -95,6 +138,11 @@ struct HomeView: View {
         }
         .onReceive(Timer.publish(every: 1, on: .main, in: .common).autoconnect()) { _ in
             focusVM.tick()
+        }
+        .onChange(of: focusVM.isFocusActive) { _, isActive in
+            if !isActive {
+                isFocusExpanded = false
+            }
         }
         .sheet(isPresented: $isShowingCustomPicker) {
             TimePickerSheet(
@@ -253,22 +301,6 @@ struct HomeView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 12))
         }
         .buttonStyle(.plain)
-    }
-
-    // MARK: - Active Focus Section
-
-    @ViewBuilder
-    private var activeFocusSection: some View {
-        let mode = Mode(rawValue: SharedData.focusMode) ?? .easy
-        let plannedMinutes = SharedData.focusPlannedMinutes
-        let estimatedReward = Int(Double(plannedMinutes) * mode.multiplier)
-
-        ActiveFocusCard(
-            countdown: focusVM.formatCountdown(focusVM.focusTimeRemaining),
-            mode: mode,
-            estimatedReward: estimatedReward,
-            onEndEarly: { isShowingEndFocusAlert = true }
-        )
     }
 }
 
