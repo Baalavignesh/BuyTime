@@ -8,7 +8,6 @@
 
 import Foundation
 import SwiftUI
-import Combine
 
 @MainActor
 class FocusViewModel: ObservableObject {
@@ -84,27 +83,11 @@ class FocusViewModel: ObservableObject {
                     print("[FocusVM] startSession API success (after cleanup): \(sessionId)")
                 } catch {
                     print("[FocusVM] startSession API failed after cleanup: \(error)")
-                    SharedData.enqueueSyncOperation(SyncOperation(
-                        kind: .start,
-                        sessionId: sessionId,
-                        mode: mode,
-                        plannedMinutes: minutes,
-                        actualMinutes: 0,
-                        penaltyMinutes: 0,
-                        createdAt: Date()
-                    ))
+                    enqueueStartOp(sessionId: sessionId, mode: mode, minutes: minutes)
                 }
             } catch {
                 print("[FocusVM] startSession API failed: \(error)")
-                SharedData.enqueueSyncOperation(SyncOperation(
-                    kind: .start,
-                    sessionId: sessionId,
-                    mode: mode,
-                    plannedMinutes: minutes,
-                    actualMinutes: 0,
-                    penaltyMinutes: 0,
-                    createdAt: Date()
-                ))
+                enqueueStartOp(sessionId: sessionId, mode: mode, minutes: minutes)
             }
         }
     }
@@ -145,7 +128,7 @@ class FocusViewModel: ObservableObject {
                     plannedMinutes: 0,
                     actualMinutes: 0,
                     penaltyMinutes: penalty,
-                    createdAt: Date()
+                    createdAt: Date.now
                 ))
             }
         }
@@ -189,7 +172,7 @@ class FocusViewModel: ObservableObject {
                     plannedMinutes: plannedMinutes,
                     actualMinutes: actualMinutes,
                     penaltyMinutes: 0,
-                    createdAt: Date()
+                    createdAt: Date.now
                 ))
             }
         }

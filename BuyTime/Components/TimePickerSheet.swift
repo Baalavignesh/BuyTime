@@ -43,8 +43,8 @@ struct TimePickerSheet: View {
             .frame(maxWidth: .infinity)
             .padding()
             .background(Color.blue)
-            .foregroundColor(.white)
-            .cornerRadius(14)
+            .foregroundStyle(.white)
+            .clipShape(.rect(cornerRadius: 14))
         }
         .padding(.horizontal)
         .padding(.bottom)
@@ -52,7 +52,7 @@ struct TimePickerSheet: View {
       .navigationTitle(title)
       .navigationBarTitleDisplayMode(.inline)
       .toolbar {
-        if let onCancel = onCancel {
+        if let onCancel {
           ToolbarItem(placement: .cancellationAction) {
             Button("Cancel") { onCancel() }
           }
@@ -62,11 +62,6 @@ struct TimePickerSheet: View {
   }
 
   private func formatDuration(_ minutes: Int) -> String {
-    if minutes >= 60 {
-      let h = minutes / 60
-      let m = minutes % 60
-      return m > 0 ? "\(h)h \(m)m" : "\(h)h"
-    }
-    return "\(minutes) min"
+    FormatUtils.duration(minutes)
   }
 }

@@ -37,7 +37,8 @@ class AuthorizationManager: ObservableObject {
 
         // Fallback: if the publisher hasn't emitted a resolved status within
         // 1 second, this is likely a fresh install — show the auth prompt.
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
+        Task { @MainActor [weak self] in
+            try? await Task.sleep(for: .seconds(1))
             guard let self, !self.hasResolved else { return }
             self.authorizationStatus = AuthorizationCenter.shared.authorizationStatus
             self.hasResolved = true

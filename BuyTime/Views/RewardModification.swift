@@ -109,12 +109,12 @@ struct RewardModification: View {
                 VStack(spacing: 4) {
                     Text("Your Day, Planned")
                         .font(.system(.largeTitle, design: .rounded))
-                        .foregroundColor(.white.opacity(0.5))
+                        .foregroundStyle(.white.opacity(0.5))
                         .multilineTextAlignment(.center)
 
                     Text("The totals below are how much work and reward you'll accumulate across the entire day.")
                         .font(.system(.subheadline, design: .rounded))
-                        .foregroundColor(.white.opacity(0.5))
+                        .foregroundStyle(.white.opacity(0.5))
                         .multilineTextAlignment(.center)
                 }
 
@@ -130,22 +130,22 @@ struct RewardModification: View {
                             Text("WORK")
                                 .font(.system(.caption, design: .rounded))
                                 .fontWeight(.semibold)
-                                .foregroundColor(.white.opacity(0.5))
+                                .foregroundStyle(.white.opacity(0.5))
                                 .tracking(2)
 
                             HStack(alignment: .firstTextBaseline, spacing: 2) {
                                 Text("\(formattedWorkTime.hours)")
                                     .font(.system(size: 32, weight: .medium, design: .rounded))
-                                    .foregroundColor(.white)
+                                    .foregroundStyle(.white)
                                 Text("h")
                                     .font(.system(.title3, design: .rounded))
-                                    .foregroundColor(.white.opacity(0.6))
+                                    .foregroundStyle(.white.opacity(0.6))
                                 Text("\(formattedWorkTime.minutes)")
                                     .font(.system(size: 32, weight: .medium, design: .rounded))
-                                    .foregroundColor(.white)
+                                    .foregroundStyle(.white)
                                 Text("m")
                                     .font(.system(.title3, design: .rounded))
-                                    .foregroundColor(.white.opacity(0.6))
+                                    .foregroundStyle(.white.opacity(0.6))
                             }
                         }
                         .frame(maxWidth: .infinity)
@@ -158,22 +158,22 @@ struct RewardModification: View {
                             Text("REWARD")
                                 .font(.system(.caption, design: .rounded))
                                 .fontWeight(.semibold)
-                                .foregroundColor(.white.opacity(0.5))
+                                .foregroundStyle(.white.opacity(0.5))
                                 .tracking(2)
 
                             HStack(alignment: .firstTextBaseline, spacing: 2) {
                                 Text("\(formattedRewardTime.hours)")
                                     .font(.system(size: 32, weight: .medium, design: .rounded))
-                                    .foregroundColor(.white)
+                                    .foregroundStyle(.white)
                                 Text("h")
                                     .font(.system(.title3, design: .rounded))
-                                    .foregroundColor(.white.opacity(0.6))
+                                    .foregroundStyle(.white.opacity(0.6))
                                 Text("\(formattedRewardTime.minutes)")
                                     .font(.system(size: 32, weight: .medium, design: .rounded))
-                                    .foregroundColor(.white)
+                                    .foregroundStyle(.white)
                                 Text("m")
                                     .font(.system(.title3, design: .rounded))
-                                    .foregroundColor(.white.opacity(0.6))
+                                    .foregroundStyle(.white.opacity(0.6))
                             }
                         }
                         .frame(maxWidth: .infinity)
@@ -210,7 +210,7 @@ struct RewardModification: View {
                     Text("DIFFICULTY")
                         .font(.system(.caption, design: .rounded))
                         .fontWeight(.semibold)
-                        .foregroundColor(.white.opacity(0.5))
+                        .foregroundStyle(.white.opacity(0.5))
                         .tracking(2)
 
                     HStack(spacing: 12) {
@@ -235,7 +235,7 @@ struct RewardModification: View {
             if let message = vm.errorMessage {
                 Text(message)
                     .font(.system(.subheadline, design: .rounded))
-                    .foregroundColor(.white)
+                    .foregroundStyle(.white)
                     .padding(.horizontal, 16)
                     .padding(.vertical, 10)
                     .background(Color.red.opacity(0.85))
@@ -274,14 +274,14 @@ struct SliderSection: View {
                 Text(title)
                     .font(.system(.subheadline, design: .rounded))
                     .fontWeight(.medium)
-                    .foregroundColor(.white.opacity(0.7))
+                    .foregroundStyle(.white.opacity(0.7))
 
                 Spacer()
 
                 Text("\(Int(value)) \(unit)")
                     .font(.system(.title3, design: .rounded))
                     .fontWeight(.bold)
-                    .foregroundColor(.white)
+                    .foregroundStyle(.white)
             }
 
             Slider(value: $value, in: range)
@@ -293,13 +293,13 @@ struct SliderSection: View {
             HStack {
                 Text("\(Int(range.lowerBound))")
                     .font(.system(.caption2, design: .rounded))
-                    .foregroundColor(.white.opacity(0.4))
+                    .foregroundStyle(.white.opacity(0.4))
 
                 Spacer()
 
                 Text("\(Int(range.upperBound))")
                     .font(.system(.caption2, design: .rounded))
-                    .foregroundColor(.white.opacity(0.4))
+                    .foregroundStyle(.white.opacity(0.4))
             }
         }
         .padding(16)
@@ -336,7 +336,7 @@ struct ModeButton: View {
             Text(label)
                 .font(.system(.subheadline, design: .rounded))
                 .fontWeight(.semibold)
-                .foregroundColor(isSelected ? .black : .white)
+                .foregroundStyle(isSelected ? .black : .white)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 14)
                 .background(

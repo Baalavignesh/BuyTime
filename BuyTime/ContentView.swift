@@ -24,44 +24,47 @@ struct ContentView: View {
             ParentView()
         } else {
             VStack {
-                VStack {
-                    Spacer()
-                    Text("ByTime")
-                        .font(.largeTitle)
-                        .multilineTextAlignment(.center)
-                        .padding(32)
-                    Text("A practical productivity tool that you won't uninstall after a week").padding(16)
-                        .font(.default)
-                        .multilineTextAlignment(.center)
-                    Spacer()
+                Spacer()
+                Text("ByTime")
+                    .font(.largeTitle)
+                    .multilineTextAlignment(.center)
+                    .padding(32)
+                Text("A practical productivity tool that you won't uninstall after a week")
+                    .padding(16)
+                    .font(.body)
+                    .multilineTextAlignment(.center)
+                Spacer()
+                Button {
+                    Task { await signInWithOAuth(provider: .google) }
+                } label: {
                     Image("google")
                         .resizable()
                         .scaledToFit()
                         .frame(width: 300)
-                        .clipShape(RoundedRectangle(cornerRadius: 8))
-                        .overlay(
+                        .clipShape(.rect(cornerRadius: 8))
+                        .overlay {
                             RoundedRectangle(cornerRadius: 8)
                                 .stroke(colorScheme == .light ? Color.black : Color.clear, lineWidth: 1)
-                        )
-                        .onTapGesture {
-                            Task { await signInWithOAuth(provider: .google) }
                         }
-                        .padding(.bottom, 8)
-                        
+                }
+                .buttonStyle(.plain)
+                .padding(.bottom, 8)
+
+                Button {
+                    Task { await signInWithOAuth(provider: .apple) }
+                } label: {
                     Image("apple")
                         .resizable()
                         .scaledToFit()
                         .frame(width: 300)
-                        .clipShape(RoundedRectangle(cornerRadius: 8))
-                        .overlay(
+                        .clipShape(.rect(cornerRadius: 8))
+                        .overlay {
                             RoundedRectangle(cornerRadius: 8)
                                 .stroke(colorScheme == .dark ? Color.white : Color.clear, lineWidth: 1)
-                        )
-                        .onTapGesture {
-                            Task { await signInWithOAuth(provider: .apple) }
                         }
-                        .padding(.bottom, 8)
                 }
+                .buttonStyle(.plain)
+                .padding(.bottom, 8)
             }
             .padding(10)
         }

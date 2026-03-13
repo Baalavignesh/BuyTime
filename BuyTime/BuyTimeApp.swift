@@ -24,7 +24,9 @@ struct ClerkQuickstartApp: App {
                     isClerkLoaded = true
 
                     // DEV ONLY: Print long-lived JWT for API testing
+                    #if DEBUG
                     await printJWTToken()
+                    #endif
 
                     // Recover any focus state that resolved while the app was closed
                     await recoverFocusState()
@@ -82,7 +84,7 @@ struct ClerkQuickstartApp: App {
                             plannedMinutes: plannedMinutes,
                             actualMinutes: actualMinutes,
                             penaltyMinutes: 0,
-                            createdAt: Date()
+                            createdAt: Date.now
                         ))
                     }
                 }
@@ -98,6 +100,7 @@ struct ClerkQuickstartApp: App {
 
     // MARK: - DEV ONLY: Remove before production
 
+    #if DEBUG
     func printJWTToken() async {
         do {
             if let session = Clerk.shared.session {
@@ -109,4 +112,5 @@ struct ClerkQuickstartApp: App {
             print("Failed to get JWT token: \(error)")
         }
     }
+    #endif
 }

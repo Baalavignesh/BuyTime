@@ -8,11 +8,10 @@
 //  Created by Baalavignesh Arunachalam on 2/20/26.
 //
 
-import Foundation
-
 import SwiftUI
 import Combine
 
+@MainActor
 class PreferencesViewModel: ObservableObject {
     
     // MARK: - Published State

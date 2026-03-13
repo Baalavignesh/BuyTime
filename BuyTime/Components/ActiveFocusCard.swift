@@ -80,13 +80,12 @@ struct ActiveFocusCard: View {
     private var topBar: some View {
         HStack {
             if isExpanded {
-                Button { onCollapse?() } label: {
-                    Image(systemName: "chevron.down")
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundStyle(.white.opacity(0.5))
-                        .frame(width: 36, height: 36)
-                        .background(.ultraThinMaterial, in: Circle())
-                }
+                Button("Collapse", systemImage: "chevron.down") { onCollapse?() }
+                    .labelStyle(.iconOnly)
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundStyle(.white.opacity(0.5))
+                    .frame(width: 36, height: 36)
+                    .background(.ultraThinMaterial, in: Circle())
             } else {
                 Text("FOCUS SESSION")
                     .font(.system(size: 10, weight: .medium, design: .monospaced))

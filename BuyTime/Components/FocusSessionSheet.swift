@@ -30,7 +30,16 @@ struct FocusSessionSheet: View {
                     Divider().padding(.horizontal, 16)
                     infoRow("Est. Reward", value: "~\(estimatedReward) min")
                     Divider().padding(.horizontal, 16)
-                    infoRow("Ends At", value: formatTime(endTime))
+                    HStack {
+                        Text("Ends At")
+                            .foregroundStyle(.secondary)
+                        Spacer()
+                        Text(endTime, format: .dateTime.hour().minute())
+                            .fontWeight(.semibold)
+                            .foregroundStyle(.white)
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 12)
                 }
                 .background(Color(white: 0.13))
                 .clipShape(RoundedRectangle(cornerRadius: 12))
@@ -66,18 +75,7 @@ struct FocusSessionSheet: View {
     }
 
     private func formatDuration(_ minutes: Int) -> String {
-        if minutes >= 60 {
-            let h = minutes / 60
-            let m = minutes % 60
-            return m > 0 ? "\(h)h \(m)m" : "\(h)h"
-        }
-        return "\(minutes) min"
-    }
-
-    private func formatTime(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.timeStyle = .short
-        return formatter.string(from: date)
+        FormatUtils.duration(minutes)
     }
 }
 
@@ -96,6 +94,9 @@ private struct SwipeToStartSlider: View {
     @State private var isCompleted = false
     @State private var isDragging = false
     @State private var lastHapticPercent: Int = 0
+    @State private var hapticTrigger: Int = 0
+    @State private var completionTrigger: Bool = false
+    @State private var failureTrigger: Bool = false
 
     var body: some View {
         GeometryReader { geo in
@@ -107,9 +108,9 @@ private struct SwipeToStartSlider: View {
                 RoundedRectangle(cornerRadius: 8)
                     .fill(Color(white: 0.20))
                     .frame(height: trackHeight)
-                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                    .clipShape(.rect(cornerRadius: 8))
                     // Glossy border — visible on all sides
-                    .overlay(
+                    .overlay {
                         RoundedRectangle(cornerRadius: 8)
                             .stroke(
                                 LinearGradient(
@@ -125,15 +126,15 @@ private struct SwipeToStartSlider: View {
                                 ),
                                 lineWidth: 1
                             )
-                    )
+                    }
                     // Soft inner shadow for inset depth
-                    .overlay(
+                    .overlay {
                         RoundedRectangle(cornerRadius: 8)
                             .stroke(.black.opacity(0.25), lineWidth: 1)
                             .blur(radius: 1)
                             .offset(y: 1)
                             .mask(RoundedRectangle(cornerRadius: 8).fill(.black))
-                    )
+                    }
                     // Subtle outer glow
                     .shadow(color: .white.opacity(0.06), radius: 2, y: -1)
 
@@ -158,9 +159,9 @@ private struct SwipeToStartSlider: View {
                     .overlay {
                         Image(systemName: isCompleted ? "checkmark" : "chevron.right.2")
                             .font(.system(size: 16, weight: .bold))
-                            .foregroundColor(.white)
+                            .foregroundStyle(.white)
                     }
-                    .overlay(
+                    .overlay {
                         RoundedRectangle(cornerRadius: 8)
                             .stroke(
                                 LinearGradient(
@@ -170,7 +171,7 @@ private struct SwipeToStartSlider: View {
                                 ),
                                 lineWidth: 0.75
                             )
-                    )
+                    }
                     .shadow(color: .black.opacity(0.4), radius: 3, y: 2)
                     .offset(x: edgePadding + dragOffset)
                     .gesture(
@@ -180,7 +181,7 @@ private struct SwipeToStartSlider: View {
                                 if !isDragging {
                                     isDragging = true
                                     lastHapticPercent = 0
-                                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                                    hapticTrigger += 1
                                 }
                                 dragOffset = min(max(0, value.translation.width), maxDrag)
 
@@ -188,7 +189,7 @@ private struct SwipeToStartSlider: View {
                                 let currentPercent = Int(progress * 4) // 0,1,2,3
                                 if currentPercent > lastHapticPercent {
                                     lastHapticPercent = currentPercent
-                                    UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                                    hapticTrigger += 1
                                 }
                             }
                             .onEnded { _ in
@@ -201,13 +202,14 @@ private struct SwipeToStartSlider: View {
                                     withAnimation(.easeOut(duration: 0.2)) {
                                         dragOffset = maxDrag
                                     }
-                                    UINotificationFeedbackGenerator().notificationOccurred(.success)
-                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                                    completionTrigger.toggle()
+                                    Task {
+                                        try? await Task.sleep(for: .milliseconds(300))
                                         onSuccess()
                                     }
                                 } else {
                                     // Fail — spring back
-                                    UINotificationFeedbackGenerator().notificationOccurred(.warning)
+                                    failureTrigger.toggle()
                                     withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
                                         dragOffset = 0
                                     }
@@ -219,5 +221,8 @@ private struct SwipeToStartSlider: View {
             .padding(.vertical, 20)
         }
         .frame(height: trackHeight)
+        .sensoryFeedback(.impact(flexibility: .solid, intensity: 0.6), trigger: hapticTrigger)
+        .sensoryFeedback(.success, trigger: completionTrigger)
+        .sensoryFeedback(.warning, trigger: failureTrigger)
     }
 }

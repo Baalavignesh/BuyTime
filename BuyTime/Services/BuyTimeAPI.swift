@@ -89,7 +89,9 @@ class BuyTimeAPI {
         body: Data? = nil,
         forceTokenRefresh: Bool = false
     ) async throws -> T {
-        let url = URL(string: "\(baseURL)\(endpoint)")!
+        guard let url = URL(string: "\(baseURL)\(endpoint)") else {
+            throw APIError.badRequest("Invalid URL: \(endpoint)")
+        }
         var request = URLRequest(url: url)
         request.httpMethod = method
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -100,7 +102,7 @@ class BuyTimeAPI {
             : try await getAuthToken()
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         
-        if let body = body {
+        if let body {
             request.httpBody = body
         }
         
@@ -306,7 +308,7 @@ class BuyTimeAPI {
             } catch APIError.notFound {
                 // User not yet created by webhook, wait and retry
                 if attempt < maxRetries - 1 {
-                    try await Task.sleep(nanoseconds: delaySeconds * 1_000_000_000)
+                    try await Task.sleep(for: .seconds(delaySeconds))
                 }
                 continue
             }

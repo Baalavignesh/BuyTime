@@ -95,12 +95,10 @@ class SharedData {
 
     static var earnedTimeMinutes: Int {
         get {
-            defaultsGroup?.synchronize()
-            return defaultsGroup?.integer(forKey: Keys.earnedTimeMinutes.rawValue) ?? 0
+            defaultsGroup?.integer(forKey: Keys.earnedTimeMinutes.rawValue) ?? 0
         }
         set {
             defaultsGroup?.set(max(0, newValue), forKey: Keys.earnedTimeMinutes.rawValue)
-            defaultsGroup?.synchronize()
         }
     }
 

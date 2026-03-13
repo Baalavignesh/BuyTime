@@ -15,7 +15,6 @@ struct FocusMinutes: Identifiable {
 
 
 struct HomeView: View {
-    // @Binding var selectedTab: Int
 
     @StateObject private var balanceVM = BalanceViewModel()
     @StateObject private var prefsVM = PreferencesViewModel()
@@ -43,8 +42,9 @@ struct HomeView: View {
         ("1hr", 60)
     ]
 
+    private let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
+
     init() {
-        // _selectedTab = selectedTab
         let balance = BalanceViewModel()
         let prefs = PreferencesViewModel()
         _balanceVM = StateObject(wrappedValue: balance)
@@ -69,15 +69,17 @@ struct HomeView: View {
                     todayStatsSection
 
                     if focusVM.isFocusActive {
-                        ActiveFocusCard(
-                            isExpanded: false,
-                            countdown: focusVM.formatCountdown(focusVM.focusTimeRemaining),
-                            mode: focusMode,
-                            estimatedReward: focusEstimatedReward
-                        )
-                        .onTapGesture {
+                        Button {
                             isFocusExpanded = true
+                        } label: {
+                            ActiveFocusCard(
+                                isExpanded: false,
+                                countdown: focusVM.formatCountdown(focusVM.focusTimeRemaining),
+                                mode: focusMode,
+                                estimatedReward: focusEstimatedReward
+                            )
                         }
+                        .buttonStyle(.plain)
                     } else {
                         startFocusSection
                     }
@@ -136,7 +138,7 @@ struct HomeView: View {
                 Task { await focusVM.drainSyncQueue() }
             }
         }
-        .onReceive(Timer.publish(every: 1, on: .main, in: .common).autoconnect()) { _ in
+        .onReceive(timer) { _ in
             focusVM.tick()
         }
         .onChange(of: focusVM.isFocusActive) { _, isActive in

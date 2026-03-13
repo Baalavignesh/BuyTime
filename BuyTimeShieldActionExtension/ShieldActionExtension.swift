@@ -30,7 +30,7 @@ class ShieldActionExtension: ShieldActionDelegate {
         case .secondaryButtonPressed:
             completionHandler(.close)
         @unknown default:
-            fatalError()
+            completionHandler(.close)
         }
     }
 
