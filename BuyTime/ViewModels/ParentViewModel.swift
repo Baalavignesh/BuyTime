@@ -11,24 +11,37 @@ import Combine
 
 @MainActor
 class AuthorizationManager: ObservableObject {
-    
+
     @Published var authorizationStatus: FamilyControls.AuthorizationStatus = .notDetermined
-    @Published var isLoading = true
+    /// True until the Combine publisher has emitted a non-notDetermined status
+    /// (or two emissions total, meaning the system has fully resolved).
+    @Published var hasResolved = false
 
     private var cancellables = Set<AnyCancellable>()
-    
+
     init() {
-        // Get initial status
-        self.authorizationStatus = AuthorizationCenter.shared.authorizationStatus
-        
-        // Subscribe to authorization status changes
+        // AuthorizationCenter publishes .notDetermined first, then the real
+        // status on the next tick (for returning users). We skip the first
+        // .notDetermined so we don't flash the auth prompt for approved users.
+        //
+        // For fresh installs, the status genuinely IS .notDetermined and no
+        // second emission comes — the fallback timer handles that case.
         AuthorizationCenter.shared.$authorizationStatus
+            .dropFirst()
             .receive(on: DispatchQueue.main)
             .sink { [weak self] status in
                 self?.authorizationStatus = status
-                self?.isLoading = false
+                self?.hasResolved = true
             }
             .store(in: &cancellables)
+
+        // Fallback: if the publisher hasn't emitted a resolved status within
+        // 1 second, this is likely a fresh install — show the auth prompt.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
+            guard let self, !self.hasResolved else { return }
+            self.authorizationStatus = AuthorizationCenter.shared.authorizationStatus
+            self.hasResolved = true
+        }
     }
     
     func requestAuthorization() async {

@@ -19,8 +19,6 @@ struct ContentView: View {
 
     var body: some View {
         if !isClerkLoaded {
-            // Clerk is still restoring the session — show nothing to avoid
-            // flashing the auth screen for already signed-in users.
             Color.black.ignoresSafeArea()
         } else if clerk.session != nil {
             ParentView()
@@ -28,7 +26,7 @@ struct ContentView: View {
             VStack {
                 VStack {
                     Spacer()
-                    Text("BuyTime")
+                    Text("ByTime")
                         .font(.largeTitle)
                         .multilineTextAlignment(.center)
                         .padding(32)
@@ -74,13 +72,7 @@ extension ContentView {
 
   func signInWithOAuth(provider: OAuthProvider) async {
     do {
-      // Start the sign-in process using the selected OAuth provider.
       let result = try await SignIn.authenticateWithRedirect(strategy: .oauth(provider: provider))
-
-      // It is common for users who are authenticating with OAuth to use
-      // a sign-in button when they mean to sign-up, and vice versa.
-      // Clerk will handle this transfer for you if possible.
-      // Therefore, a TransferFlowResult can be either a SignIn or SignUp.
 
       switch result {
       case .signIn(let signIn):
@@ -103,8 +95,6 @@ extension ContentView {
         }
       }
     } catch {
-      // See https://clerk.com/docs/guides/development/custom-flows/error-handling
-      // for more info on error handling.
       dump(error)
     }
   }

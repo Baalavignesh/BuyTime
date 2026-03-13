@@ -14,97 +14,84 @@ struct ParentView: View {
     @State var selection = FamilyActivitySelection()
     @AppStorage("hasCompletedAppSelection") var hasCompletedAppSelection = false
     @State private var selectedTab: Int = 0
+    @State private var showContent = false
+    @State private var showMainApp = false
 
     var hasSelection: Bool {
             !selection.applicationTokens.isEmpty ||
             !selection.categoryTokens.isEmpty ||
             !selection.webDomainTokens.isEmpty
         }
-    
+
     var body: some View {
-        
-        if authManager.isLoading {
-            VStack {
-                Image(systemName: "hourglass")
-                    .font(.system(size: 60))
-                    .foregroundStyle(.tint)
-                Text("BuyTime")
-                    .font(.largeTitle)
-                    .fontWeight(.bold)
-            }
-        }
-        else if authManager.authorizationStatus == .notDetermined {
-            VStack {
-                
-                Text("BuyTime").font(.largeTitle)
-                Image(systemName: "hourglass.badge.lock")
-                    .font(.title)
-                    .imageScale(.large).padding(.vertical, 10)
-                Text("ScreenTime protects your privacy. BuyTime cannot see which apps are on your device or which app you have selected")
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 32)
-                    .padding(.bottom, 24)
-                Button("Allow ScreenTime Access") {
-                    Task {
-                        await authManager.requestAuthorization()
-                    }
-                }.buttonStyle(PrimaryButtonStyle())
-                
-            }
-            
-            
-        }
-        else if authManager.authorizationStatus == .approved {
-            if !hasCompletedAppSelection {
-                VStack {
-                                    Text("Select Distracting Apps to Block")
-                                        .font(.headline)
-                                        .padding(.top)
-                                    
-                                    FamilyActivityPicker(selection: $selection)
-                                    
-                                    Button("Continue") {
-                                        // Save selection and proceed
-                                        saveSelection()
-                                        hasCompletedAppSelection = true
-                                    }
-                                    .buttonStyle(PrimaryButtonStyle())
-                                    .disabled(!hasSelection) // Disable if no apps selected
-                                    .padding()
-                                }
-            }
-            else {
-                TabView(selection: $selectedTab) {
-                    Tab("Home", systemImage: "brain.filled.head.profile", value: 0) {
-                        HomeView()
-                    }
+        ZStack {
+            // Content layer — always rendered underneath, fades in
+            Group {
+                if authManager.authorizationStatus == .notDetermined {
+                    PermissionView(authManager: authManager)
+                }
+                else if authManager.authorizationStatus == .approved {
+                    if !hasCompletedAppSelection {
+                        VStack {
+                            Text("Select Distracting Apps to Block")
+                                .font(.headline)
+                                .padding(.top)
 
-                    Tab("Time", systemImage: "hourglass", value: 1) {
-                        TimeView()
-                    }
+                            FamilyActivityPicker(selection: $selection)
 
-                    Tab("Settings", systemImage: "gear", value: 2) {
-                        SettingsView()
+                            Button("Continue") {
+                                saveSelection()
+                                hasCompletedAppSelection = true
+                                showMainApp = false
+                            }
+                            .buttonStyle(PrimaryButtonStyle())
+                            .disabled(!hasSelection)
+                            .padding()
+                        }
+                    }
+                    else {
+                        TabView(selection: $selectedTab) {
+                            Tab("Home", systemImage: "brain.filled.head.profile", value: 0) {
+                                HomeView()
+                            }
+
+                            Tab("Time", systemImage: "hourglass", value: 1) {
+                                TimeView()
+                            }
+
+                            Tab("Settings", systemImage: "gear", value: 2) {
+                                SettingsView()
+                            }
+                        }
+                        .opacity(showMainApp ? 1 : 0)
+                        .onAppear {
+                            withAnimation(.easeOut(duration: 0.4)) {
+                                showMainApp = true
+                            }
+                        }
                     }
                 }
+                else {
+                    PermissionView(authManager: authManager)
+                }
+            }
+            .opacity(showContent ? 1 : 0)
+
+            // Launch screen layer — matches the auto-generated LaunchScreen
+            // Sits on top, fades out once auth resolves to reveal content
+            if !showContent {
+                Color(.systemBackground)
+                    .ignoresSafeArea()
+                    .transition(.opacity)
             }
         }
-        else {
-            VStack {
-                Text("BuyTime").font(.largeTitle)
-                Image(systemName: "hourglass.badge.lock")
-                    .font(.title)
-                    .imageScale(.large).padding(.vertical, 10)
-                Text("ScreenTime Authorization Denied. Please enable in Settings.")
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 32)
-                    .padding(.bottom, 24)
-                Button("Allow ScreenTime Access") {
-                    Task {
-                        await authManager.requestAuthorization()
-                    }
-                }.buttonStyle(PrimaryButtonStyle())
-                
+        .animation(.easeOut(duration: 0.4), value: showContent)
+        .onChange(of: authManager.hasResolved) { _, resolved in
+            if resolved {
+                showContent = true
+                if hasCompletedAppSelection {
+                    showMainApp = true
+                }
             }
         }
     }
@@ -119,6 +106,72 @@ struct ParentView: View {
 
 }
 
+@ViewBuilder
+private func PermissionView(authManager: AuthorizationManager) -> some View {
+    ZStack {
+        VStack(spacing: 0) {
+            Spacer()
+
+            Button {
+                Task {
+                    await authManager.requestAuthorization()
+                }
+            } label: {
+                Image("permission")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 300)
+                    .clipShape(RoundedRectangle(cornerRadius: 32))
+                    .padding(12)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 32)
+                            .stroke(Color.blue, lineWidth: 1)
+                    )
+                    .overlay(alignment: .bottomLeading) {
+                        Image(systemName: "arrow.up")
+                            .font(.title)
+                            .imageScale(.large)
+                            .offset(x: 72, y: 52)
+                    }
+            }
+            .buttonStyle(PressableStyle())
+
+            Spacer()
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+
+        VStack(spacing: 12) {
+            Text("Private by Design")
+                .font(.largeTitle).multilineTextAlignment(.center)
+
+            Text("We can't see your apps or how you use them. ByTime will need your permission to continue.")
+                .multilineTextAlignment(.center)
+        }
+        .padding(.horizontal, 32)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+        .padding(.top, 24)
+        .allowsHitTesting(false)
+        
+        VStack(spacing: 12) {
+
+            Text("Your sensitive data is handled by Apple and never leaves your device.")
+                .multilineTextAlignment(.center)
+        }
+        .padding(.bottom, 32)
+        .padding(.horizontal, 32)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
+        .allowsHitTesting(false)
+    }
+}
+
+private struct PressableStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed ? 0.96 : 1.0)
+            .opacity(configuration.isPressed ? 0.7 : 1.0)
+            .animation(.easeInOut(duration: 0.15), value: configuration.isPressed)
+    }
+}
 
 #Preview {
     ParentView()
