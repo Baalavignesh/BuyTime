@@ -17,56 +17,85 @@ struct ContentView: View {
     @Environment(\.clerk) private var clerk
     @Environment(\.colorScheme) private var colorScheme
 
+    @State private var shaderStart: Date = .now
+
     var body: some View {
         if !isClerkLoaded {
             Color.black.ignoresSafeArea()
         } else if clerk.session != nil {
             ParentView()
         } else {
-            VStack {
-                Spacer()
-                Text("ByTime")
-                    .font(.largeTitle)
-                    .multilineTextAlignment(.center)
-                    .padding(32)
-                Text("A practical productivity tool that you won't uninstall after a week")
-                    .padding(16)
-                    .font(.body)
-                    .multilineTextAlignment(.center)
-                Spacer()
-                Button {
-                    Task { await signInWithOAuth(provider: .google) }
-                } label: {
-                    Image("google")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 300)
-                        .clipShape(.rect(cornerRadius: 8))
-                        .overlay {
-                            RoundedRectangle(cornerRadius: 8)
-                                .stroke(colorScheme == .light ? Color.black : Color.clear, lineWidth: 1)
-                        }
-                }
-                .buttonStyle(.plain)
-                .padding(.bottom, 8)
+            ZStack {
+                shaderBackground
 
-                Button {
-                    Task { await signInWithOAuth(provider: .apple) }
-                } label: {
-                    Image("apple")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 300)
-                        .clipShape(.rect(cornerRadius: 8))
-                        .overlay {
-                            RoundedRectangle(cornerRadius: 8)
-                                .stroke(colorScheme == .dark ? Color.white : Color.clear, lineWidth: 1)
-                        }
+                VStack {
+                    Spacer()
+                    Text("ByTime")
+                        .font(.largeTitle)
+                        .fontWeight(.bold)
+                        .foregroundStyle(.white)
+                        .multilineTextAlignment(.center)
+                        .padding(32)
+                    Text("We both know you're not giving up your phone. So let's make a deal — earn your screen time by actually getting things done first.")
+                        .padding(16)
+                        .font(.body)
+                        .foregroundStyle(.white.opacity(0.6))
+                        .multilineTextAlignment(.center)
+                    Spacer()
+                    Button {
+                        Task { await signInWithOAuth(provider: .google) }
+                    } label: {
+                        Image("google")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 300)
+                            .clipShape(.rect(cornerRadius: 8))
+                            .overlay {
+                                RoundedRectangle(cornerRadius: 8)
+                                    .stroke(Color.white.opacity(0.2), lineWidth: 0.5)
+                            }
+                    }
+                    .buttonStyle(.plain)
+                    .padding(.bottom, 8)
+
+                    Button {
+                        Task { await signInWithOAuth(provider: .apple) }
+                    } label: {
+                        Image("apple")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 300)
+                            .clipShape(.rect(cornerRadius: 8))
+                            .overlay {
+                                RoundedRectangle(cornerRadius: 8)
+                                    .stroke(Color.white.opacity(0.2), lineWidth: 0.5)
+                            }
+                    }
+                    .buttonStyle(.plain)
+                    .padding(.bottom, 8)
                 }
-                .buttonStyle(.plain)
-                .padding(.bottom, 8)
+                .padding(10)
             }
-            .padding(10)
+            .ignoresSafeArea()
+        }
+    }
+
+    // MARK: - Shader Background
+
+    @ViewBuilder
+    private var shaderBackground: some View {
+        TimelineView(.animation) { timeline in
+            let elapsed = timeline.date.timeIntervalSince(shaderStart)
+            GeometryReader { geo in
+                Color.black
+                    .colorEffect(
+                        ShaderLibrary.focusBackground(
+                            .float2(Float(geo.size.width), Float(geo.size.height)),
+                            .float(Float(elapsed)),
+                            .float(1.0)
+                        )
+                    )
+            }
         }
     }
 }

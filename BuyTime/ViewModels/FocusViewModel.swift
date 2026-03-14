@@ -8,6 +8,7 @@
 
 import Foundation
 import SwiftUI
+import Combine
 
 @MainActor
 class FocusViewModel: ObservableObject {
@@ -215,6 +216,18 @@ class FocusViewModel: ObservableObject {
     }
 
     // MARK: - Helpers
+
+    private func enqueueStartOp(sessionId: String, mode: String, minutes: Int) {
+        SharedData.enqueueSyncOperation(SyncOperation(
+            kind: .start,
+            sessionId: sessionId,
+            mode: mode,
+            plannedMinutes: minutes,
+            actualMinutes: 0,
+            penaltyMinutes: 0,
+            createdAt: Date.now
+        ))
+    }
 
     func formatCountdown(_ interval: TimeInterval) -> String {
         let total = max(0, Int(interval))
